@@ -260,13 +260,15 @@ db.connect()
     console.error('❌ Database connection error:', error.message);
   });
 
-// Mail transporter for SMTP
+
 const mailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'mail.privateemail.com',
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: false,
-  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  tls: { rejectUnauthorized: false }
+  host: process.env.SMTP_HOST || "mail.privateemail.com",
+  port: parseInt(process.env.SMTP_PORT, 10) || 587,
+  secure: false, // STARTTLS on port 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
 });
 
 // Verify email transporter on startup
