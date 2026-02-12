@@ -262,19 +262,27 @@ db.connect()
 
 
 const mailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "mail.privateemail.com",
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT, 10) || 587,
-  secure: false, // STARTTLS on port 587
+  secure: parseInt(process.env.SMTP_PORT, 10) === 465, 
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 // Verify email transporter on startup
+if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  console.warn('⚠️ Warning: SMTP_USER or SMTP_PASS environment variables are not set. Email functionality will fail.');
+}
+console.log('📧 Verifying email transporter with:', process.env.SMTP_HOST || "smtp.gmail.com", 'on port:', process.env.SMTP_PORT || 587);
 mailTransporter.verify((error, success) => {
   if (error) {
     console.error('❌ Email transporter verification failed:', error.message);
+    console.error('  Check your SMTP_USER, SMTP_PASS, SMTP_HOST, and SMTP_PORT environment variables.');
   } else {
     console.log('✅ Email transporter is ready to send emails');
   }
@@ -283,17 +291,26 @@ mailTransporter.verify((error, success) => {
 // Simple mail helper that fails safely
 async function sendMailSafe({ to, subject, text, html }) {
   try {
-    if (!to) return;
-    await mailTransporter.sendMail({
-      from: `EssayMe <${process.env.SMTP_USER || 'hello@iyonicorp.com'}>`,
+    if (!to) {
+      console.warn('⚠️ No recipient specified for email:', subject);
+      return;
+    }
+    
+    const mailOptions = {
+      from: `"EssayMe" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text: text || (html ? html.replace(/<[^>]+>/g, ' ') : ''),
       html: html || undefined
-    });
-    console.log('✓ Email sent to:', to, '| Subject:', subject);
+    };
+
+    const info = await mailTransporter.sendMail(mailOptions);
+    console.log('✓ Email sent successfully:', info.messageId, '| To:', to, '| Subject:', subject);
+    return info;
   } catch (e) {
-    console.error('✗ Email send failed:', subject, 'to:', to, '| Error:', e?.message || e);
+    console.error('✗ Email send failed:', subject, 'to:', to);
+    console.error('  Error detail:', e?.message || e);
+    if (e?.response) console.error('  SMTP Response:', e.response);
   }
 }
 
