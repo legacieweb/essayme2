@@ -84,7 +84,7 @@
 </nav>
   
   <!-- Sidebar -->
-  <audio id="tutor-update-audio" src="audio/notify.mp3" preload="auto"></audio>
+  <!-- <audio id="tutor-update-audio" src="audio/notify.mp3" preload="auto"></audio> -->
 
   <div class="sidebar hidden lg:block fixed left-0 top-0 h-full w-64 text-white p-6 shadow-lg">
     <div class="mb-8">
@@ -334,8 +334,8 @@
       <!-- Desktop helper (optional) -->
       <div class="hidden lg:block text-sm text-gray-500">Tip: Use the flow above to open chat in a popup.</div>
 
-      <audio id="tutor-new-message-audio" src="audio/receive.mp3" preload="auto"></audio>
-      <audio id="tutor-send-audio" src="audio/send.mp3" preload="auto"></audio>
+      <!-- <audio id="tutor-new-message-audio" src="audio/receive.mp3" preload="auto"></audio>
+      <audio id="tutor-send-audio" src="audio/send.mp3" preload="auto"></audio> -->
     </section>
   </div>
 
@@ -572,9 +572,7 @@
   </div>
 
   <script>
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? '' 
-      : 'https://essayme2.onrender.com';
+    const API_BASE = ''; // Use relative paths since frontend is served by the same server
 
     // Helper for authenticated fetches
     async function fetchWithAuth(url, options = {}) {
@@ -1500,6 +1498,7 @@
         const tutorId = localStorage.getItem('tutorId');
         if (!tutorId || tutorId.length < 1) return;
         const response = await fetchWithAuth(`${API_BASE}/tutor/profile/${tutorId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
         
         if (result.success) {
