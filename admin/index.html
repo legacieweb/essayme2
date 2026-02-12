@@ -572,7 +572,9 @@
   </div>
 
   <script>
-    const API_BASE = 'https://essayme2.onrender.com';
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? '' 
+      : 'https://essayme2.onrender.com';
 
     // Helper for authenticated fetches
     async function fetchWithAuth(url, options = {}) {
@@ -1568,6 +1570,10 @@
           fetchWithAuth(`${API_BASE}/tutor/pending-payments`)
         ]);
 
+        if (!assignmentsRes.ok || !studentsRes.ok || !paymentsRes.ok) {
+            throw new Error('One or more stats requests failed');
+        }
+
         const assignmentsData = await assignmentsRes.json();
         const studentsData = await studentsRes.json();
         const paymentsData = await paymentsRes.json();
@@ -1659,6 +1665,7 @@
     async function loadAssignments() {
       try {
         const response = await fetchWithAuth(`${API_BASE}/tutor/assignments`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
 
         if (result.success) {
@@ -1987,6 +1994,7 @@
     async function loadStudents() {
       try {
         const response = await fetchWithAuth(`${API_BASE}/tutor/students`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
 
         if (result.success) {
@@ -2266,6 +2274,7 @@
     async function loadPendingPayments() {
       try {
         const response = await fetchWithAuth(`${API_BASE}/tutor/pending-payments`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
 
         if (result.success) {

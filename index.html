@@ -1322,6 +1322,9 @@
 </div>
 
   <script>
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? '' 
+      : 'https://essayme2.onrender.com';
     const segmentButtons = document.querySelectorAll('.segment-toggle button');
     const panels = {
       writing: document.getElementById('quote-panel-writing'),
@@ -1640,7 +1643,7 @@
          button.disabled = true;
          button.textContent = 'Joining the heart…';
          try {
-           const res = await fetch('https://essayme2.onrender.com/login', {
+           const res = await fetch(`${API_BASE}/login`, {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ email, password })
@@ -1685,7 +1688,7 @@
         button.disabled = true;
         button.textContent = 'Connecting…';
         try {
-          const res = await fetch('https://essayme2.onrender.com/register', {
+          const res = await fetch(`${API_BASE}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
@@ -1721,7 +1724,7 @@
       if (!emailField.value.trim()) return;
       message.textContent = 'Sending…';
       try {
-        const res = await fetch('https://essayme2.onrender.com/auth/request-reset-otp', {
+        const res = await fetch(`${API_BASE}/auth/request-reset-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: emailField.value.trim().toLowerCase() })

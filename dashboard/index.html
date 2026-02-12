@@ -2171,7 +2171,9 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 const studentId = localStorage.getItem("userId"); // Ensure user ID is stored
-const API_BASE = "https://essayme2.onrender.com";
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? '' 
+    : "https://essayme2.onrender.com";
 
 // Helper for authenticated fetches
 async function fetchWithAuth(url, options = {}) {
@@ -3234,6 +3236,7 @@ document.getElementById("chat-box").addEventListener("input", toggleSendButton);
     list.innerHTML = '<div class="text-gray-500 text-sm">Loading...</div>';
     try{
       const res = await fetchWithAuth(`${API_BASE}/student/assignments?userId=${encodeURIComponent(loggedInStudentId)}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       if(!data.success){ list.innerHTML = '<div class="text-red-600 text-sm">Failed to load assignments</div>'; return; }
       const items = (data.assignments||[]).map(a=>{
@@ -3529,6 +3532,7 @@ async function updateDashboardOverview() {
 async function loadUserPayments() {
     try {
         const response = await fetchWithAuth(`${API_BASE}/payments/${studentId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
         
         if (result.success) {
