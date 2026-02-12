@@ -757,7 +757,7 @@
   
 <!-- Messages Section -->
 <section id="messages" class="p-6 pb-20 md:pb-6 hidden">
-  <script>document.write('<script src="' + (window.API_BASE || 'http://localhost:3002') + '/socket.io/socket.io.js"><\/script>');</script>
+  <script>document.write('<script src="' + (window.API_BASE || 'https://essayme2.onrender.com') + '/socket.io/socket.io.js"><\/script>');</script>
 
   <!-- Assignment Selection View -->
   <div id="assignment-selection-view" class="transition-all duration-500 ease-in-out">
@@ -2171,7 +2171,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 const studentId = localStorage.getItem("userId"); // Ensure user ID is stored
-const API_BASE = "http://localhost:3002";
+const API_BASE = "https://essayme2.onrender.com";
 
 // Helper for authenticated fetches
 async function fetchWithAuth(url, options = {}) {

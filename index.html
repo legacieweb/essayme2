@@ -1640,7 +1640,7 @@
          button.disabled = true;
          button.textContent = 'Joining the heart…';
          try {
-           const res = await fetch('http://localhost:3002/login', {
+           const res = await fetch('https://essayme2.onrender.com/login', {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ email, password })
@@ -1685,7 +1685,7 @@
         button.disabled = true;
         button.textContent = 'Connecting…';
         try {
-          const res = await fetch('http://localhost:3002/register', {
+          const res = await fetch('https://essayme2.onrender.com/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
@@ -1721,7 +1721,7 @@
       if (!emailField.value.trim()) return;
       message.textContent = 'Sending…';
       try {
-        const res = await fetch('http://localhost:3002/auth/request-reset-otp', {
+        const res = await fetch('https://essayme2.onrender.com/auth/request-reset-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: emailField.value.trim().toLowerCase() })
