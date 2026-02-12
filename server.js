@@ -606,7 +606,7 @@ app.post('/update-balance', async (req, res) => {
 
 // Authentication middleware
 const requireAuth = async (req, res, next) => {
-  const email = (req.body.email || req.query.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
+  const email = (req.body?.email || req.query?.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
   if (!email) {
     return res.status(401).json({ error: 'Missing email parameter' });
   }
@@ -624,7 +624,7 @@ const requireAuth = async (req, res, next) => {
 };
 
 const requireAdmin = async (req, res, next) => {
-  const email = (req.body.email || req.query.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
+  const email = (req.body?.email || req.query?.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
   if (!email) {
     console.warn('requireAdmin: Missing email');
     return res.status(401).json({ error: 'Missing email parameter' });
@@ -648,7 +648,7 @@ const requireAdmin = async (req, res, next) => {
 };
 
 const requireTutor = async (req, res, next) => {
-  const email = (req.body.email || req.query.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
+  const email = (req.body?.email || req.query?.email || req.headers['x-user-email'] || req.headers['X-User-Email'])?.toLowerCase();
   if (!email) {
     return res.status(401).json({ error: 'Missing email parameter' });
   }
