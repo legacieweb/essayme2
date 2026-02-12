@@ -25,12 +25,12 @@
     /* Font Customization */
     #dashboard-content {
       font-family: var(--dash-font-family, inherit);
-      color: var(--dash-font-color, inherit);
+      color: #000000;
     }
 
     /* Chat Theme Variables */
     :root {
-      /* Default Theme */
+      color-scheme: light;
       --student-chat-bg: #3b82f6;
       --student-chat-text: #ffffff;
       --tutor-chat-bg: #f3f4f6;
@@ -86,12 +86,15 @@
 
     /* Theme base */
     :root { color-scheme: light; }
+    body { color: #000000; }
+    .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500 { color: #000000 !important; }
     .dark :root { color-scheme: dark; }
     .dark body { background-color: #0f172a; color: #e2e8f0; }
     .dark .bg-white { background-color: #0b1220 !important; }
     .dark .text-gray-800 { color: #e2e8f0 !important; }
     .dark .text-gray-700 { color: #cbd5e1 !important; }
     .dark .text-gray-600 { color: #94a3b8 !important; }
+    .dark .text-gray-500 { color: #94a3b8 !important; }
     .dark .bg-gray-50 { background-color: #0f172a !important; }
     .dark .bg-gray-100 { background-color: #0b1220 !important; }
     .dark .border-gray-200 { border-color: #1f2937 !important; }
@@ -517,11 +520,10 @@
 <style>
   :root {
     --dash-font-family: inherit;
-    --dash-font-color: inherit;
   }
   #dashboard-content {
     font-family: var(--dash-font-family);
-    color: var(--dash-font-color);
+    color: #000000;
   }
   #dash-bg-container img, #dash-bg-container video {
     width: 100%;
@@ -1235,16 +1237,6 @@
                 </label>
               </div>
             </div>
-            
-            <div>
-              <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">Font Size</h4>
-              <input type="range" id="fontSizeSlider" min="12" max="20" value="16" class="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateFontSize(this.value)">
-              <div class="flex justify-between text-xs text-gray-500 dark:text-gray-500 mt-1">
-                <span>Small</span>
-                <span>Medium</span>
-                <span>Large</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1273,11 +1265,6 @@
                 <option value="'Merriweather', serif">Merriweather (Serif)</option>
                 <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
               </select>
-            </div>
-            <!-- Font Color -->
-            <div>
-              <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Primary Text Color</label>
-              <input type="color" id="dash-font-color" class="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-gray-200 dark:border-gray-700" onchange="applyDashFont('color', this.value)">
             </div>
           </div>
           <div class="flex flex-wrap gap-3 mt-6">
@@ -5411,16 +5398,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function applyDashFont(type, value) {
-  const root = document.documentElement;
   const content = document.getElementById('dashboard-content');
   if (!content) return;
 
   if (type === 'family') {
     content.style.setProperty('--dash-font-family', value);
     saveDashFont({ family: value });
-  } else if (type === 'color') {
-    content.style.setProperty('--dash-font-color', value);
-    saveDashFont({ color: value });
   }
 }
 
@@ -5438,10 +5421,6 @@ function loadDashFont() {
       applyDashFont('family', data.family);
       document.getElementById('dash-font-family').value = data.family;
     }
-    if (data.color) {
-      applyDashFont('color', data.color);
-      document.getElementById('dash-font-color').value = data.color;
-    }
   }
 }
 
@@ -5449,11 +5428,9 @@ function resetDashFont() {
   const content = document.getElementById('dashboard-content');
   if (content) {
     content.style.removeProperty('--dash-font-family');
-    content.style.removeProperty('--dash-font-color');
   }
   localStorage.removeItem('dash_font');
   document.getElementById('dash-font-family').value = 'inherit';
-  document.getElementById('dash-font-color').value = '#000000';
   showNotification('Fonts reset to default.', 'success');
 }
 
@@ -5580,12 +5557,6 @@ function setTheme(mode) {
   }
 }
 
-function updateFontSize(size) {
-  document.documentElement.style.fontSize = `${size}px`;
-  localStorage.setItem('fontSize', size);
-  showNotification(`Font size set to ${size}px`, 'success');
-}
-
 function resetAllSettings() {
   if (confirm('Are you sure you want to reset all settings to default?')) {
     // Reset theme
@@ -5610,24 +5581,12 @@ function resetAllSettings() {
     document.getElementById('twoFactorAuth').checked = false;
     document.getElementById('sessionTimeout').value = '30';
     
-    // Reset font size
-    document.documentElement.style.fontSize = '16px';
-    localStorage.removeItem('fontSize');
-    document.getElementById('fontSizeSlider').value = '16';
-    
     showNotification('All settings reset to default', 'success');
   }
 }
 
 // Load saved settings on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Load font size
-  const savedFontSize = localStorage.getItem('fontSize');
-  if (savedFontSize) {
-    document.documentElement.style.fontSize = `${savedFontSize}px`;
-    document.getElementById('fontSizeSlider').value = savedFontSize;
-  }
-  
   // Load notifications settings
   const savedNotifications = localStorage.getItem('notifications');
   if (savedNotifications) {
