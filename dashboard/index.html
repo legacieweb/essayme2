@@ -3837,13 +3837,14 @@ async function openOrderModal() {
     document.getElementById('dueDateTime').min = now.toISOString().slice(0, 16);
 
     // Fetch auto-applied coupon if not already applied
-    if (!appliedCoupon) {
+    if (appliedCoupons.length === 0) {
         try {
             const response = await fetchWithAuth(`${API_BASE}/api/coupons/auto`);
             const result = await response.json();
             if (result.success && result.coupon) {
                 autoAppliedCoupon = result.coupon;
-                appliedCoupon = result.coupon;
+                appliedCoupons.push(result.coupon);
+                renderAppliedCoupons();
                 document.getElementById('couponCode').value = result.coupon.code;
                 showCouponMessage('Onsite Discount applied automatically!', 'success');
                 updatePriceBreakdown();
@@ -4015,8 +4016,6 @@ function resetOrderModal() {
 
     const timeWarning = document.getElementById('timeWarning');
     if (timeWarning) timeWarning.classList.add('hidden');
-
-    appliedCoupon = null;
     
     // Reset file list
     const fileList = document.getElementById('fileList');

@@ -1626,14 +1626,14 @@ app.get('/messages', async (req, res) => {
       SELECT 
         id as "_id", 
         content, 
-        createdat as "createdAt",
+        created_at as "createdAt",
         CASE 
-          WHEN senderid = (SELECT user_id FROM orders WHERE id = $1) THEN 'student'
+          WHEN sender_id = (SELECT user_id FROM orders WHERE id = $1) THEN 'student'
           ELSE 'tutor'
         END as sender
       FROM messages 
-      WHERE orderid = $1
-      ORDER BY createdat ASC
+      WHERE order_id = $1
+      ORDER BY created_at ASC
     `, [parseInt(assignmentId)]);
 
     res.json({
@@ -1667,9 +1667,9 @@ app.post('/messages', async (req, res) => {
     }
 
     const newMessage = await db.one(`
-      INSERT INTO messages (orderid, senderid, receiverid, content, read)
+      INSERT INTO messages (order_id, sender_id, receiver_id, content, read)
       VALUES ($1, $2, $3, $4, $5)
-      RETURNING id as "_id", orderid as "assignmentId", senderid, receiverid, content, read, createdat as "createdAt"
+      RETURNING id as "_id", order_id as "assignmentId", sender_id, receiver_id, content, read, created_at as "createdAt"
     `, [
       parseInt(assignmentId),
       sender_id,
@@ -1703,9 +1703,9 @@ app.post('/send-message', requireAuth, async (req, res) => {
     const { toUserId, message, orderId } = req.body;
 
     const newMessage = await db.one(`
-      INSERT INTO messages (senderid, receiverid, content, orderid, read)
+      INSERT INTO messages (sender_id, receiver_id, content, order_id, read)
       VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, senderid, receiverid, content, orderid, read, createdat as created_at
+      RETURNING id, sender_id, receiver_id, content, order_id, read, created_at
     `, [
       user.id,
       parseInt(toUserId),
@@ -1737,16 +1737,16 @@ app.get('/messages/:email', async (req, res) => {
 
     // Get all messages for the user
     const userMessages = await db.manyOrNone(`
-      SELECT *, createdat as "createdAt" FROM messages 
-      WHERE senderid = $1 OR receiverid = $1
-      ORDER BY createdat ASC
+      SELECT *, created_at as "createdAt" FROM messages 
+      WHERE sender_id = $1 OR receiver_id = $1
+      ORDER BY created_at ASC
     `, [user.id]);
 
     // Mark unread messages as read
     await db.none(`
       UPDATE messages 
       SET read = true 
-      WHERE receiverid = $1 AND read = false
+      WHERE receiver_id = $1 AND read = false
     `, [user.id]);
 
     res.json(userMessages);
