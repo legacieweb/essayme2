@@ -113,6 +113,7 @@ const createTables = async () => {
         amount NUMERIC NOT NULL,
         payment_method TEXT NOT NULL,
         transaction_id TEXT,
+        reference TEXT,
         status TEXT NOT NULL DEFAULT 'completed',
         proof_file TEXT,
         original_name TEXT,
@@ -125,6 +126,7 @@ const createTables = async () => {
       DO $$ BEGIN
         ALTER TABLE payments ADD COLUMN IF NOT EXISTS proof_file TEXT;
         ALTER TABLE payments ADD COLUMN IF NOT EXISTS original_name TEXT;
+        ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference TEXT;
         ALTER TABLE payments ALTER COLUMN transaction_id DROP NOT NULL;
       EXCEPTION
         WHEN duplicate_column THEN NULL;
@@ -262,14 +264,17 @@ db.connect()
 
 
 const mailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  service: process.env.SMTP_SERVICE || undefined, // e.g. 'gmail'
+  host: process.env.SMTP_HOST || (process.env.SMTP_SERVICE ? undefined : "smtp.gmail.com"),
   port: parseInt(process.env.SMTP_PORT, 10) || 587,
-  secure: parseInt(process.env.SMTP_PORT, 10) === 465, 
+  secure: parseInt(process.env.SMTP_PORT, 10) === 465,
+  pool: true, // Use connection pooling for better reliability
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
   tls: {
+    // This allows it to work on various networks including those with self-signed certs
     rejectUnauthorized: false
   }
 });
@@ -278,7 +283,10 @@ const mailTransporter = nodemailer.createTransport({
 if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.warn('⚠️ Warning: SMTP_USER or SMTP_PASS environment variables are not set. Email functionality will fail.');
 }
-console.log('📧 Verifying email transporter with:', process.env.SMTP_HOST || "smtp.gmail.com", 'on port:', process.env.SMTP_PORT || 587);
+console.log('📧 Verifying email transporter...');
+console.log(`   Service: ${process.env.SMTP_SERVICE || 'Direct SMTP'}`);
+console.log(`   Host: ${process.env.SMTP_HOST || "smtp.gmail.com"}`);
+console.log(`   Port: ${process.env.SMTP_PORT || 587}`);
 mailTransporter.verify((error, success) => {
   if (error) {
     console.error('❌ Email transporter verification failed:', error.message);
@@ -347,6 +355,22 @@ const emailTemplates = {
            </ul>
            <p>We will keep you updated.</p>
            <p>— EssayMe Team</p>`
+  }),
+
+  balanceRecovered: (name, newBalance, reason) => ({
+    subject: 'Your EssayMe Wallet Balance has been Adjusted',
+    html: `<div style="font-family: Arial, sans-serif; color: #333;">
+             <h2 style="color: #3b82f6;">Balance Adjustment Notification</h2>
+             <p>Hi <strong>${name}</strong>,</p>
+             <p>This is to inform you that your wallet balance has been manually adjusted by an administrator.</p>
+             <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin: 20px 0;">
+               <p style="margin: 5px 0;"><strong>New Balance:</strong> <span style="color: #10b981; font-size: 1.2em;">${fmtMoney(newBalance)}</span></p>
+               <p style="margin: 5px 0;"><strong>Reason:</strong> ${reason || 'Manual recovery/adjustment'}</p>
+             </div>
+             <p>You can view your updated balance and transaction history in your <a href="https://essayme.com/dashboard" style="color: #3b82f6; text-decoration: none; font-weight: bold;">Student Dashboard</a>.</p>
+             <p>If you have any questions regarding this adjustment, please contact our support team or reply to this email.</p>
+             <p>Best regards,<br><strong>The EssayMe Team</strong></p>
+           </div>`
   }),
   
   assignmentAccepted: (name, order) => ({
@@ -668,6 +692,54 @@ const requireTutor = async (req, res, next) => {
   }
 };
 
+// Admin Adjust User Balance (Recover/Change Money)
+app.post('/tutor/adjust-balance', requireTutor, async (req, res) => {
+  try {
+    const { userId, newAmount, reason } = req.body;
+    
+    if (!userId || newAmount === undefined) {
+      return res.status(400).json({ success: false, error: 'userId and newAmount are required' });
+    }
+
+    const userIdInt = parseInt(userId);
+    const newAmountFloat = parseFloat(newAmount);
+
+    // Get user details first for email
+    const user = await db.one('SELECT name, email FROM users WHERE id = $1', [userIdInt]);
+
+    // Update user balance directly to the new amount
+    const updatedUser = await db.one(`
+      UPDATE users 
+      SET balance = $1, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = $2
+      RETURNING balance
+    `, [newAmountFloat, userIdInt]);
+
+    // Record adjustment in payments for history - using 'Recovered' as reference prefix
+    const adjReason = reason || 'Manual adjustment by admin';
+    await db.none(`
+      INSERT INTO payments (user_id, amount, payment_method, transaction_id, reference, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [userIdInt, newAmountFloat, 'admin_adjustment', `REC-${Date.now()}`, `Recovered: ${adjReason}`, 'approved']);
+
+    // Send email notification
+    await sendMailSafe({
+      to: user.email,
+      ...emailTemplates.balanceRecovered(user.name, updatedUser.balance, adjReason)
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'User balance updated successfully and email sent', 
+      newBalance: parseFloat(updatedUser.balance) 
+    });
+
+  } catch (error) {
+    console.error('Error adjusting balance:', error);
+    res.status(500).json({ success: false, error: 'Failed to adjust balance', details: error.message });
+  }
+});
+
 // User Registration
 app.post('/register', async (req, res) => {
   try {
@@ -917,16 +989,29 @@ app.post('/upload-profile', upload.single('profileImage'), requireAuth, async (r
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    // Read the file and convert to base64
+    const fs = require('fs');
+    const filePath = req.file.path;
+    const fileData = fs.readFileSync(filePath);
+    const base64Image = `data:${req.file.mimetype};base64,${fileData.toString('base64')}`;
+
     const user = req.user;
     await db.none(`
       UPDATE users 
       SET profile_image = $1, updated_at = CURRENT_TIMESTAMP 
       WHERE id = $2
-    `, [`/uploads/${req.file.filename}`, user.id]);
+    `, [base64Image, user.id]);
+
+    // Delete the temporary file
+    try {
+      fs.unlinkSync(filePath);
+    } catch (unlinkError) {
+      console.error('Error deleting temp file:', unlinkError);
+    }
 
     res.json({
       message: 'Profile image uploaded successfully',
-      profileImage: `/uploads/${req.file.filename}`
+      profileImage: base64Image
     });
 
   } catch (error) {
@@ -945,7 +1030,13 @@ app.post('/update-account', upload.single('profileImage'), async (req, res) => {
 
     let profileImageUrl = null;
     if (req.file) {
-      profileImageUrl = `/uploads/${req.file.filename}`;
+      const fs = require('fs');
+      const filePath = req.file.path;
+      const fileData = fs.readFileSync(filePath);
+      profileImageUrl = `data:${req.file.mimetype};base64,${fileData.toString('base64')}`;
+      
+      // Delete temp file
+      try { fs.unlinkSync(filePath); } catch (e) {}
     }
 
     const updatedUser = await db.one(`
@@ -1227,7 +1318,7 @@ app.get('/payments/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const payments = await db.manyOrNone(`
-      SELECT id, amount::FLOAT, payment_method as method, status, created_at as "createdAt"
+      SELECT id, amount::FLOAT, payment_method, payment_method as method, reference, status, created_at as "createdAt"
       FROM payments 
       WHERE user_id = $1
       ORDER BY created_at DESC

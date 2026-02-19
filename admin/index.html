@@ -536,6 +536,17 @@
                 <span class="text-gray-500">Wallet Balance:</span>
                 <span id="studentDetailBalance" class="font-bold text-green-600">$0.00</span>
               </div>
+              
+              <!-- Adjust Balance UI -->
+              <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 space-y-2">
+                <p class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">Adjust Balance (Recover Money)</p>
+                <div class="flex gap-2">
+                  <input type="number" id="adjustBalanceAmount" placeholder="New amount" class="w-full px-2 py-1 text-sm border rounded">
+                  <button onclick="adjustBalance(event)" class="px-3 py-1 bg-blue-600 text-white text-xs rounded font-bold hover:bg-blue-700">Set</button>
+                </div>
+                <input type="text" id="adjustBalanceReason" placeholder="Reason (optional)" class="w-full px-2 py-1 text-[10px] border rounded">
+              </div>
+
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Member Since:</span>
                 <span id="studentDetailJoined" class="font-medium text-gray-700">-</span>
@@ -572,7 +583,7 @@
   </div>
 
   <script>
-    const API_BASE = 'https://essayme2.onrender.com';
+    const API_BASE = 'http://localhost:3002';
 
     // Helper for authenticated fetches
     async function fetchWithAuth(url, options = {}) {
@@ -605,6 +616,7 @@
 
     function getImageUrl(path) {
       if (!path) return null;
+      if (path.startsWith('data:image')) return path; // Base64 direct support
       if (path.startsWith('http')) return path;
       if (path.startsWith('/uploads/')) return `${API_BASE}${path}`;
       if (path.startsWith('uploads/')) return `${API_BASE}/${path}`;
@@ -2058,6 +2070,68 @@
     function closeStudentDetailsModal() {
       document.getElementById('studentDetailsModal').classList.add('hidden');
       selectedStudent = null;
+    }
+
+    async function adjustBalance() {
+      if (!selectedStudent) return;
+      
+      const newAmountInput = document.getElementById('adjustBalanceAmount');
+      const reasonInput = document.getElementById('adjustBalanceReason');
+      const adjustBtn = event.target; // The button that was clicked
+      
+      const newAmount = newAmountInput.value;
+      const reason = reasonInput.value;
+      
+      if (newAmount === "") {
+        showNotification("Please enter a new balance amount", "error");
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to change ${selectedStudent.name}'s balance to $${parseFloat(newAmount).toFixed(2)}?`)) {
+        return;
+      }
+
+      // Disable button to prevent duplicates
+      const originalBtnText = adjustBtn.textContent;
+      adjustBtn.disabled = true;
+      adjustBtn.textContent = "Updating...";
+      
+      try {
+        const response = await fetchWithAuth(`${API_BASE}/tutor/adjust-balance`, {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: selectedStudent.id,
+            newAmount: parseFloat(newAmount),
+            reason: reason || "Manual adjustment by admin"
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showNotification(`Balance updated to $${result.newBalance.toFixed(2)}`, "success");
+          
+          // Update local data and UI
+          selectedStudent.balance = result.newBalance;
+          document.getElementById('studentDetailBalance').textContent = `$${result.newBalance.toFixed(2)}`;
+          
+          // Reset inputs
+          newAmountInput.value = "";
+          reasonInput.value = "";
+          
+          // Refresh student list in background
+          loadStudents();
+        } else {
+          showNotification(result.error || "Failed to update balance", "error");
+        }
+      } catch (error) {
+        console.error("Error adjusting balance:", error);
+        showNotification("An error occurred while adjusting balance", "error");
+      } finally {
+        // Re-enable button
+        adjustBtn.disabled = false;
+        adjustBtn.textContent = originalBtnText;
+      }
     }
 
     async function loadStudentAssignments(studentId) {

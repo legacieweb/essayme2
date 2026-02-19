@@ -11,11 +11,11 @@
   <style>
     /* Glassmorphism Tiles */
     .glass-card {
-      background: rgba(255, 255, 255, 0.1) !important;
-      backdrop-filter: blur(16px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+      background: rgba(255, 255, 255, 0.6) !important;
+      backdrop-filter: blur(20px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.4) !important;
+      box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08) !important;
     }
     .dark .glass-card {
       background: rgba(15, 23, 42, 0.3) !important;
@@ -85,10 +85,47 @@
     }
 
     /* Theme base */
-    :root { color-scheme: light; }
-    body { color: #000000; }
-    .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500 { color: #000000 !important; }
-    .dark :root { color-scheme: dark; }
+    :root { 
+      color-scheme: light;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      --border-color: #e2e8f0;
+      --accent-color: #3b82f6;
+    }
+    
+    body { 
+      background-color: var(--bg-primary); 
+      color: var(--text-main); 
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .text-gray-900 { color: var(--text-main) !important; }
+    .text-gray-800 { color: #1e293b !important; }
+    .text-gray-700 { color: #334155 !important; }
+    .text-gray-600 { color: #475569 !important; }
+    .text-gray-500 { color: #64748b !important; }
+    .text-gray-400 { color: #94a3b8 !important; }
+
+    /* Light Theme Specific Overrides */
+    .bg-white { background-color: var(--bg-secondary) !important; }
+    .bg-gray-50 { background-color: var(--bg-primary) !important; }
+    .bg-gray-100 { background-color: #f1f5f9 !important; }
+    .border-gray-100 { border-color: #f1f5f9 !important; }
+    .border-gray-200 { border-color: var(--border-color) !important; }
+    .border-gray-300 { border-color: #cbd5e1 !important; }
+
+    .dark :root { 
+      color-scheme: dark;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #cbd5e1;
+      --text-light: #94a3b8;
+      --border-color: #334155;
+    }
     .dark body { background-color: #0f172a; color: #e2e8f0; }
     .dark .bg-white { background-color: #0b1220 !important; }
     .dark .text-gray-800 { color: #e2e8f0 !important; }
@@ -344,12 +381,6 @@
       transform: translateX(0);
     }
 
-    /* Active State for Sidebar */
-    .active {
-      background-color: #60a5fa; /* Blue */
-      border-radius: 0.375rem;
-    }
-
     /* Stepper Styles */
     .stepper {
       display: flex;
@@ -365,7 +396,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background-color: #e5e7eb;
+      background-color: var(--border-color);
       transform: translateY(-50%);
       z-index: 0;
     }
@@ -374,21 +405,23 @@
       width: 2.5rem;
       height: 2.5rem;
       border-radius: 50%;
-      background-color: #fff;
-      border: 2px solid #e5e7eb;
+      background-color: var(--bg-secondary);
+      border: 2px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
+      color: var(--text-light);
       z-index: 1;
       transition: all 0.3s ease;
       cursor: pointer;
     }
 
     .step.active {
-      border-color: #3b82f6;
-      background-color: #3b82f6;
+      border-color: var(--accent-color);
+      background-color: var(--accent-color);
       color: #fff;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
     }
 
     .step.completed {
@@ -398,18 +431,20 @@
     }
 
     .step-label {
-      position: absolute;
-      top: 3rem;
       font-size: 0.75rem;
-      white-space: nowrap;
-      color: #6b7280;
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .step.active + .step-label {
+      color: var(--accent-color);
     }
 
     .dark .step {
-      background-color: #1f2937;
-      border-color: #374151;
-      color: #94a3b8;
+      background-color: var(--bg-secondary);
+      border-color: var(--border-color);
+      color: var(--text-light);
     }
 
     .dark .step.active {
@@ -426,7 +461,7 @@
 
     /* Sidebar Styles */
     .icon-sidebar {
-      background-color: #bfdbfe; /* Light Blue */
+      background-color: var(--bg-secondary);
       height: 100%;
       position: fixed;
       top: 0;
@@ -437,7 +472,52 @@
       justify-content: center;
       align-items: center;
       padding: 1rem 0;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.05);
+      border-right: 1px solid var(--border-color);
+      z-index: 50;
+    }
+
+    .icon-sidebar a {
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .icon-sidebar a:hover {
+      color: var(--accent-color);
+      transform: scale(1.1);
+    }
+
+    .icon-sidebar a.active {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: var(--accent-color);
+      border-radius: 0.75rem;
+    }
+
+    /* Bottom Nav for Mobile */
+    .student-bottom-nav {
+      background-color: var(--bg-secondary) !important;
+      color: var(--text-main) !important;
+      border-top: 1px solid var(--border-color);
+      box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .student-bottom-nav button {
+      color: var(--text-muted);
+    }
+
+    .student-bottom-nav button:hover, .student-bottom-nav button.active {
+      color: var(--accent-color);
+    }
+
+    .dark .student-bottom-nav {
+      background-color: #0f172a !important;
+      color: #e2e8f0 !important;
+      border-top-color: #1f2937;
+    }
+
+    .dark .icon-sidebar {
+      background-color: #0f172a;
+      border-right-color: #1f2937;
     }
 
     /* Mobile Sidebar */
@@ -523,7 +603,7 @@
   }
   #dashboard-content {
     font-family: var(--dash-font-family);
-    color: #000000;
+    color: var(--text-main);
   }
   #dash-bg-container img, #dash-bg-container video {
     width: 100%;
@@ -532,16 +612,6 @@
     position: absolute;
     top: 0;
     left: 0;
-  }
-  .glass-card {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-  .dark .glass-card {
-    background: rgba(15, 23, 42, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>
 </head>
@@ -1242,22 +1312,60 @@
 
         <!-- Dashboard Customization -->
         <div class="lg:col-span-2 mt-8 border-t pt-8">
-          <h3 class="font-semibold text-gray-700 dark:text-gray-300 text-lg mb-6">Dashboard Customization</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Background Color -->
-            <div>
-              <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Background Color</label>
-              <input type="color" id="dash-bg-color" class="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-gray-200 dark:border-gray-700" onchange="applyDashBg('color', this.value)">
+          <div class="flex items-center justify-between mb-8">
+            <h3 class="font-bold text-gray-900 dark:text-white text-xl flex items-center">
+              <i class="fas fa-magic mr-3 text-blue-500"></i>
+              Dashboard Customization
+            </h3>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Background Theme -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all">
+              <div class="flex items-center mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mr-3">
+                  <i class="fas fa-palette"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white">Background Color</h4>
+                  <p class="text-xs text-gray-500">Set a solid color theme</p>
+                </div>
+              </div>
+              <input type="color" id="dash-bg-color" class="w-full h-12 rounded-xl cursor-pointer bg-transparent border-2 border-gray-100 dark:border-gray-700 p-1" onchange="applyDashBg('color', this.value)">
             </div>
-            <!-- Photo/Video Upload -->
-            <div>
-              <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Background Image/Video</label>
-              <input type="file" id="dash-bg-upload" accept="image/*,video/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="handleDashBgUpload(this)">
+
+            <!-- Media Background -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all">
+              <div class="flex items-center mb-4">
+                <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mr-3">
+                  <i class="fas fa-image"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white">Visual Background</h4>
+                  <p class="text-xs text-gray-500">Upload image or video</p>
+                </div>
+              </div>
+              <div class="relative group">
+                <input type="file" id="dash-bg-upload" accept="image/*,video/*" class="hidden" onchange="handleDashBgUpload(this)">
+                <button onclick="document.getElementById('dash-bg-upload').click()" class="w-full py-2.5 px-4 bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400 hover:border-indigo-500 hover:text-indigo-500 transition-all flex items-center justify-center">
+                  <i class="fas fa-upload mr-2"></i>
+                  Choose File
+                </button>
+              </div>
             </div>
-            <!-- Font Style -->
-            <div>
-              <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Font Family</label>
-              <select id="dash-font-family" class="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500" onchange="applyDashFont('family', this.value)">
+
+            <!-- Typography -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all">
+              <div class="flex items-center mb-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 mr-3">
+                  <i class="fas fa-font"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 dark:text-white">Font Family</h4>
+                  <p class="text-xs text-gray-500">Personalize typography</p>
+                </div>
+              </div>
+              <select id="dash-font-family" class="w-full p-2.5 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-sm" onchange="applyDashFont('family', this.value)">
                 <option value="inherit">Default (Sans)</option>
                 <option value="'Inter', sans-serif">Inter</option>
                 <option value="'Poppins', sans-serif">Poppins</option>
@@ -1267,18 +1375,29 @@
               </select>
             </div>
           </div>
-          <div class="flex flex-wrap gap-3 mt-6">
-            <button onclick="resetDashBg()" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-all text-sm font-semibold">
-              Reset Background
-            </button>
-            <button onclick="resetDashFont()" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-all text-sm font-semibold">
-              Reset Fonts
-            </button>
-            <button onclick="resetAllSettings()" class="px-4 py-2 bg-red-200 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-300 dark:hover:bg-red-900/50 transition-all text-sm font-semibold">
-              Reset All Settings
+
+          <div class="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800">
+            <div class="flex flex-wrap gap-3">
+              <button onclick="resetDashBg()" class="px-5 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm font-bold flex items-center">
+                <i class="fas fa-undo mr-2 text-gray-400"></i>
+                Reset UI
+              </button>
+              <button onclick="resetDashFont()" class="px-5 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm font-bold flex items-center">
+                <i class="fas fa-text-height mr-2 text-gray-400"></i>
+                Reset Fonts
+              </button>
+            </div>
+            
+            <button onclick="resetAllSettings()" class="px-6 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl border border-red-100 dark:border-red-900/30 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 transition-all text-sm font-bold flex items-center group">
+              <i class="fas fa-trash-alt mr-2 group-hover:animate-bounce"></i>
+              Factory Reset
             </button>
           </div>
-          <p class="text-xs text-gray-500 mt-4 italic">Customize your dashboard to match your style. High-resolution videos may slow down your experience.</p>
+          
+          <p class="text-xs text-gray-500 mt-4 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+            Customizing your dashboard may affect performance. High-resolution videos are recommended for desktop only.
+          </p>
         </div>
 
         <!-- Privacy & Security -->
@@ -2158,7 +2277,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 const studentId = localStorage.getItem("userId"); // Ensure user ID is stored
-const API_BASE = "https://essayme2.onrender.com";
+const API_BASE = "http://localhost:3002"; // Update with your actual API base URL
 
 // Helper for authenticated fetches
 async function fetchWithAuth(url, options = {}) {
@@ -2193,6 +2312,7 @@ async function fetchWithAuth(url, options = {}) {
 
 function getImageUrl(path) {
     if (!path) return defaultAvatar;
+    if (path.startsWith('data:image')) return path; // Base64 direct support
     if (path.startsWith('http')) return path;
     if (path.startsWith('/uploads/')) return `${API_BASE}${path}`;
     if (path.startsWith('uploads/')) return `${API_BASE}/${path}`;
@@ -3575,20 +3695,63 @@ async function fetchDashboardContent() {
 // Display payment history
 function displayPaymentHistory(payments) {
     const container = document.getElementById('paymentsList');
-    if (!container) { console.log('Payment history:', payments); return; }
-    container.innerHTML = '';
-    payments.forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'flex justify-between items-center py-2 border-b border-gray-100';
-        const amountText = (p.amount >= 0 ? `+$${p.amount.toFixed(2)}` : `-$${Math.abs(p.amount).toFixed(2)}`);
-        el.innerHTML = `
-          <div class="text-sm text-gray-700">${new Date(p.createdAt).toLocaleString()}</div>
-          <div class="text-sm font-medium">${p.method}</div>
-          <div class="text-sm ${p.amount>=0? 'text-green-600':'text-red-600'}">${amountText}</div>
-          <div class="text-xs text-gray-500">${p.status}</div>
+    if (!container) return;
+    
+    if (payments.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-50 dark:bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-gray-300">
+                    <i class="fas fa-receipt text-2xl"></i>
+                </div>
+                <p class="text-gray-500 font-medium uppercase tracking-widest text-[10px]">No transactions yet</p>
+            </div>
         `;
-        container.appendChild(el);
-    });
+        return;
+    }
+
+    container.innerHTML = payments.map(p => {
+        const isAdjustment = p.payment_method === 'admin_adjustment';
+        const isRecovered = p.reference && p.reference.startsWith('Recovered:');
+        
+        let statusColor = 'text-gray-500 bg-gray-100';
+        if (p.status === 'approved' || p.status === 'completed') statusColor = 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20';
+        if (p.status === 'pending') statusColor = 'text-amber-600 bg-amber-500/10 border-amber-500/20';
+        if (p.status === 'rejected' || p.status === 'failed') statusColor = 'text-rose-600 bg-rose-500/10 border-rose-500/20';
+
+        const displayAmount = Number(p.amount);
+        const amountSign = displayAmount >= 0 ? '+' : '';
+        const amountColor = displayAmount >= 0 ? 'text-emerald-600' : 'text-rose-600';
+        
+        const date = new Date(p.createdAt);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        // Clean up display title
+        let title = p.payment_method.replace(/_/g, ' ');
+        if (isRecovered) title = 'Balance Recovery';
+        else if (isAdjustment) title = 'Admin Adjustment';
+
+        return `
+            <div class="group flex items-center justify-between p-4 rounded-2xl bg-white/5 dark:bg-slate-800/10 border border-white/5 hover:border-blue-500/20 transition-all hover:bg-white/10">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 rounded-xl ${displayAmount >= 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'} flex items-center justify-center text-sm">
+                        <i class="fas ${isAdjustment ? 'fa-tools' : (displayAmount >= 0 ? 'fa-arrow-down' : 'fa-arrow-up')}"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">${title}</h4>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${dateStr} • ${timeStr}</p>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <div class="text-sm font-black ${amountColor}">${amountSign}$${Math.abs(displayAmount).toFixed(2)}</div>
+                    <div class="mt-1 inline-block px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${statusColor}">
+                        ${p.status}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Check if balance notification should be shown
@@ -4336,7 +4499,7 @@ function closePaymentModal() {
 function processPaystackPayment() {
     // Initialize Paystack payment
     const handler = PaystackPop.setup({
-        key: 'pk_test_232531a5c927ef2cc67ed1b85af3f26e3b8ed2f2',
+        key: 'pk_live_7ab8e015626516d7d00210b2e7fe169805c226b8',
         email: (localStorage.getItem('userEmail') || document.getElementById('user-email')?.textContent?.trim() || ''),
         amount: selectedPaymentAmount * 100, // Amount in kobo
         currency: 'USD',
