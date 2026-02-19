@@ -263,63 +263,35 @@ db.connect()
   });
 
 
-const mailTransporter = nodemailer.createTransport({
-  service: process.env.SMTP_SERVICE || undefined, // e.g. 'gmail'
-  host: process.env.SMTP_HOST || (process.env.SMTP_SERVICE ? undefined : "smtp.gmail.com"),
-  port: parseInt(process.env.SMTP_PORT, 10) || 587,
-  secure: parseInt(process.env.SMTP_PORT, 10) === 465,
-  pool: true, // Use connection pooling for better reliability
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  tls: {
-    // This allows it to work on various networks including those with self-signed certs
-    rejectUnauthorized: false
-  }
-});
-
-// Verify email transporter on startup
-if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.warn('⚠️ Warning: SMTP_USER or SMTP_PASS environment variables are not set. Email functionality will fail.');
-}
-console.log('📧 Verifying email transporter...');
-console.log(`   Service: ${process.env.SMTP_SERVICE || 'Direct SMTP'}`);
-console.log(`   Host: ${process.env.SMTP_HOST || "smtp.gmail.com"}`);
-console.log(`   Port: ${process.env.SMTP_PORT || 587}`);
-mailTransporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ Email transporter verification failed:', error.message);
-    console.error('  Check your SMTP_USER, SMTP_PASS, SMTP_HOST, and SMTP_PORT environment variables.');
-  } else {
-    console.log('✅ Email transporter is ready to send emails');
-  }
-});
-
-// Simple mail helper that fails safely
-async function sendMailSafe({ to, subject, text, html }) {
+const sendEmail = async ({ to, subject, html, text }) => {
   try {
-    if (!to) {
-      console.warn('⚠️ No recipient specified for email:', subject);
-      return;
-    }
-    
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
     const mailOptions = {
-      from: `"EssayMe" <${process.env.SMTP_USER}>`,
+      from: `"Essayme" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      text: text || (html ? html.replace(/<[^>]+>/g, ' ') : ''),
-      html: html || undefined
+      text: text || '', // fallback for clients that don't support HTML
+      html,
     };
 
-    const info = await mailTransporter.sendMail(mailOptions);
-    console.log('✓ Email sent successfully:', info.messageId, '| To:', to, '| Subject:', subject);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`📨 Email sent to ${to}: ${info.messageId}`);
     return info;
-  } catch (e) {
-    console.error('✗ Email send failed:', subject, 'to:', to);
-    console.error('  Error detail:', e?.message || e);
-    if (e?.response) console.error('  SMTP Response:', e.response);
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${to}:`, error.message);
   }
+};
+
+// Simple mail helper that fails safely (Legacy wrapper for backward compatibility)
+async function sendMailSafe(options) {
+  return await sendEmail(options);
 }
 
 // Email template functions
