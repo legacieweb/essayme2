@@ -8,6 +8,53 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   
   <style>
+    /* Dark Mode Base */
+    :root {
+      --bg-primary: #f3f4f6;
+      --bg-secondary: #ffffff;
+      --text-main: #1f2937;
+      --border-color: #e5e7eb;
+    }
+
+    .dark {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-main: #f1f5f9;
+      --border-color: #334155;
+    }
+
+    body { background-color: var(--bg-primary); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+    
+    .dark body { background-color: #0f172a; color: #e2e8f0; }
+    .dark .bg-white { background-color: #1e293b !important; color: #f1f5f9 !important; }
+    .dark .bg-gray-50 { background-color: #0f172a !important; }
+    .dark .bg-gray-100 { background-color: #0f172a !important; }
+    .dark .text-gray-800 { color: #f1f5f9 !important; }
+    .dark .text-gray-700 { color: #cbd5e1 !important; }
+    .dark .text-gray-600 { color: #94a3b8 !important; }
+    .dark .text-gray-500 { color: #94a3b8 !important; }
+    .dark .border { border-color: #334155 !important; }
+    .dark .border-b { border-color: #334155 !important; }
+    .dark .border-gray-100 { border-color: #334155 !important; }
+    .dark .border-gray-200 { border-color: #334155 !important; }
+    
+    /* Dark mode cards */
+    .dark .card-hover:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1) !important; color: #93c5fd !important; }
+    .dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.1) !important; }
+    .dark .bg-green-100 { background-color: rgba(34, 197, 94, 0.1) !important; }
+    .dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.1) !important; }
+    
+    /* Modal dark mode */
+    .dark .modal-content { background-color: #1e293b !important; color: #f1f5f9 !important; }
+    
+    .dark input, .dark select, .dark textarea {
+      background-color: #111827 !important;
+      color: #e5e7eb !important;
+      border-color: #374151 !important;
+    }
+    .dark input::placeholder, .dark textarea::placeholder { color: #6b7280 !important; }
+
     .status-pending { background-color: #fef3c7; color: #92400e; }
     .status-under-review { background-color: #dbeafe; color: #1e40af; }
     .status-checking-balance { background-color: #fecaca; color: #991b1b; }
@@ -71,6 +118,9 @@
   <button onclick="showSection('assignments', event)" class="flex flex-col items-center">
     <i class="fas fa-tasks text-xl"></i>
   </button>
+  <button onclick="showSection('coupons', event)" class="flex flex-col items-center">
+    <i class="fas fa-tags text-xl"></i>
+  </button>
   <button onclick="showSection('students', event)" class="flex flex-col items-center">
     <i class="fas fa-users text-xl"></i>
   </button>
@@ -83,9 +133,6 @@
   </button>
 </nav>
   
-  <!-- Sidebar -->
-  <!-- <audio id="tutor-update-audio" src="audio/notify.mp3" preload="auto"></audio> -->
-
   <div class="sidebar hidden lg:block fixed left-0 top-0 h-full w-64 text-white p-6 shadow-lg">
     <div class="mb-8">
       <h1 class="text-2xl font-bold">Tutor Dashboard</h1>
@@ -120,6 +167,10 @@
         <i class="fas fa-comments"></i>
         <span>Chat</span>
         <span id="tutor-chat-badge" class="ml-auto bg-red-600 text-white text-xs rounded-full px-2 py-0.5 hidden">0</span>
+      </a>
+      <a href="#" onclick="showSection('settings', event)" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition duration-200 nav-link">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
       </a>
     </nav>
     
@@ -333,9 +384,56 @@
 
       <!-- Desktop helper (optional) -->
       <div class="hidden lg:block text-sm text-gray-500">Tip: Use the flow above to open chat in a popup.</div>
+    </section>
+    
+    <!-- Settings Section -->
+    <section id="settings" class="space-y-6 hidden">
+      <h2 class="text-3xl font-bold text-gray-800">Settings</h2>
+      
+      <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+          <i class="fas fa-bell text-blue-600 mr-3"></i>
+          Notification Preferences
+        </h3>
+        
+        <div class="space-y-6">
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div>
+              <p class="font-bold text-gray-900">Push Notifications & Sounds</p>
+              <p class="text-sm text-gray-500">Enable sounds for new assignments and messages</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="adminPushNotifications" class="sr-only peer" checked>
+              <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
 
-      <!-- <audio id="tutor-new-message-audio" src="audio/receive.mp3" preload="auto"></audio>
-      <audio id="tutor-send-audio" src="audio/send.mp3" preload="auto"></audio> -->
+          <!-- Dark Mode Toggle -->
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div>
+              <p class="font-bold text-gray-900">Dark Mode</p>
+              <p class="text-sm text-gray-500">Switch between light and dark dashboard themes</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="adminDarkModeToggle" class="sr-only peer" onchange="toggleAdminDarkMode()">
+              <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          
+          <div class="p-4 border-l-4 border-amber-400 bg-amber-50 rounded-r-xl">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-amber-400"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-amber-700">
+                  <strong>Note:</strong> Browsers require at least one manual interaction with the page before audio can play automatically. Enabling this setting and clicking anywhere on the page will allow notification sounds.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -585,6 +683,104 @@
   <script>
     const API_BASE = 'https://essayme2.onrender.com';
 
+    // Audio notification - play the lofi mp3 for new assignments
+    let assignmentAudio = null;
+    function playAssignmentSound() {
+      try {
+        // Use absolute path from root
+        const audioPath = new URL('../audio/djlofi-pixel-dreams-259187.mp3', window.location.href).href;
+        if (!assignmentAudio || assignmentAudio.src !== audioPath) {
+          assignmentAudio = new Audio(audioPath);
+          assignmentAudio.volume = 0.5;
+        }
+        assignmentAudio.currentTime = 0;
+        const playPromise = assignmentAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.log('Audio autoplay blocked or error:', e);
+            // Try to play on next user interaction as fallback
+          });
+        }
+      } catch (e) {
+        console.log('Audio error:', e);
+      }
+    }
+
+    // Audio notification sounds using Web Audio API (no external files needed)
+    let lastActivityTime = Date.now();
+    let inactivityMusicPlayed = false;
+    let inactivityMusic = null;
+
+    function resetInactivityTimer() {
+      lastActivityTime = Date.now();
+      stopInactivityMusic();
+    }
+    // Reset inactivity timer on mouse move, key press or click
+    window.addEventListener('mousemove', resetInactivityTimer);
+    window.addEventListener('keydown', resetInactivityTimer);
+    window.addEventListener('click', resetInactivityTimer);
+
+    function stopInactivityMusic() {
+      if (inactivityMusic) {
+        inactivityMusic.pause();
+        inactivityMusic.currentTime = 0;
+        inactivityMusicPlayed = false;
+      }
+    }
+
+    // Check for 2 minutes of inactivity every 10 seconds
+    setInterval(() => {
+      const isEnabled = document.getElementById('adminPushNotifications')?.checked;
+      if (!isEnabled) return;
+      
+      const currentTime = Date.now();
+      const diff = (currentTime - lastActivityTime) / 1000 / 60; // in minutes
+      
+      if (diff >= 2 && !inactivityMusicPlayed) {
+        playNotificationSound('inactivity');
+        inactivityMusicPlayed = true;
+      }
+    }, 10000);
+
+    function playNotificationSound(type = 'default') {
+      const isEnabled = document.getElementById('adminPushNotifications')?.checked;
+      if (!isEnabled) return;
+
+      try {
+        let audioPath = '';
+        switch(type) {
+          case 'assignment':
+            audioPath = '../audio/djlofi-pixel-dreams-259187.mp3'; // Lofi for new assignment as requested for admin
+            break;
+          case 'message-receive':
+          case 'message':
+            audioPath = '../audio/receive.mp3';
+            break;
+          case 'message-send':
+            audioPath = '../audio/send.mp3';
+            break;
+          case 'inactivity':
+            audioPath = '../audio/notification-ping-335500.mp3';
+            break;
+          case 'payment':
+            audioPath = '../audio/notification-ping-335500.mp3';
+            break;
+          default:
+            audioPath = '../audio/notification-ping-335500.mp3';
+        }
+
+        if (audioPath) {
+          const audio = new Audio(audioPath);
+          if (type === 'inactivity') {
+            inactivityMusic = audio;
+          }
+          audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+      } catch (error) {
+        console.error('Error playing sound:', error);
+      }
+    }
+
     // Helper for authenticated fetches
     async function fetchWithAuth(url, options = {}) {
       const email = localStorage.getItem('userEmail');
@@ -622,6 +818,43 @@
       if (path.startsWith('uploads/')) return `${API_BASE}/${path}`;
       return `${API_BASE}/uploads/${path}`;
     }
+
+    // Dark Mode Toggle
+    function toggleAdminDarkMode() {
+      const isDark = document.getElementById('adminDarkModeToggle').checked;
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('adminDarkMode', 'true');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('adminDarkMode', 'false');
+      }
+    }
+
+    // Initialize Theme
+    function initAdminTheme() {
+      const savedTheme = localStorage.getItem('adminDarkMode');
+      const toggle = document.getElementById('adminDarkModeToggle');
+      if (savedTheme === 'true') {
+        document.documentElement.classList.add('dark');
+        if (toggle) toggle.checked = true;
+      }
+    }
+    
+    // Call on load
+    document.addEventListener('DOMContentLoaded', initAdminTheme);
+
+    // --- Audio Notification Helpers ---
+    function playChatSendSound() {
+      const audio = new Audio('../audio/send.mp3');
+      audio.play().catch(e => console.log('Audio error:', e));
+    }
+    function playChatReceiveSound() {
+      const audio = new Audio('../audio/receive.mp3');
+      audio.play().catch(e => console.log('Audio error:', e));
+    }
+
+    // --- End Audio Notification Helpers ---
 
     let currentAssignments = [];
     let currentStudents = [];
@@ -679,8 +912,7 @@
         const badgeEl = document.getElementById(`tutor-${section}-badge`);
         applyBadge(badgeEl, count);
         if (shouldSound && count > (sidebarBadgePreviousCounts[section] || 0) && count > 0) {
-          const audio = document.getElementById('tutor-update-audio');
-          audio?.play?.().catch(()=>{});
+          playNotificationSound(); // Play sound for new items
         }
         sidebarBadgePreviousCounts[section] = count;
       });
@@ -1070,18 +1302,19 @@
       loadStudents();
       loadPendingPayments();
       
+      // Real-time notifications
+      startNotificationSSE();
+      
       // init unread map
       window.tutorUnread = new Map(); // assignmentId -> count
 
-      // Set up periodic refresh for real-time updates
+      // Set up periodic refresh for dashboard stats (not chat)
       setInterval(() => {
         loadOverviewData();
         loadAssignments();
         loadPendingPayments();
         loadTutorChatStudents();
-        refreshTutorUnreadCounts();
-        if(tutorActiveAssignment) loadTutorMessages();
-      }, 15000); // Refresh every 15 seconds
+      }, 30000); // Stats refresh every 30 seconds
 
       // Chat modal init
       document.getElementById('tutor-send-modal').addEventListener('click', tutorSendMessageModal);
@@ -1233,10 +1466,44 @@
 
     let tutorActiveAssignment = null; // { id, title, studentId, tutorId }
     let sseEventSource = null;
+    let notificationEventSource = null;
     let tutorSeenMessageIds = new Set();
 
-    // Removed Socket.IO implementation to prevent duplicate messages
-    // Using SSE only for real-time messaging
+    function startNotificationSSE() {
+      if (notificationEventSource) { try { notificationEventSource.close(); } catch(_){} notificationEventSource = null; }
+      const url = `${API_BASE}/notifications/stream?role=admin`;
+      notificationEventSource = new EventSource(url);
+      
+      notificationEventSource.onmessage = (evt) => {
+        try {
+          const data = JSON.parse(evt.data);
+          if (data.type === 'new_assignment') {
+            console.log('Real-time: New assignment detected');
+            playAssignmentSound();
+            loadOverviewData();
+            loadAssignments();
+            loadRecentActivity(); // Refresh activity
+            showMessage('New assignment submitted!', 'info');
+          } else if (data.type === 'new_message') {
+            const m = data.message;
+            // Only play receive sound if the admin is not currently in a chat with this assignment
+            // If they are in the chat, the tutor SSE will handle the receive sound and display
+            const inSpecificChat = tutorActiveAssignment && String(tutorActiveAssignment.id) === String(data.assignmentId);
+            
+            if (m.sender === 'student') {
+              loadRecentActivity(); // Refresh activity for every student message
+              
+              if (!inSpecificChat) {
+                console.log('Real-time: New message from student');
+                playChatReceiveSound();
+                // Instead of full poll, increment local count
+                incrementTutorUnread(data.assignmentId);
+              }
+            }
+          }
+        } catch(e) { console.error('SSE Error:', e); }
+      };
+    }
 
     function startTutorSSE(){
       if (sseEventSource) { try { sseEventSource.close(); } catch(_){} sseEventSource = null; }
@@ -1260,16 +1527,21 @@
             append(document.getElementById('tutor-chat-history'));
             append(document.getElementById('tutor-chat-history-mobile'));
             append(document.getElementById('tutor-chat-history-modal'));
+            
+            // Reset timer and play sound on receiving
+            resetInactivityTimer();
+            
             if (!me) {
-              const chatVisible = !document.getElementById('chat').classList.contains('hidden');
-              if(chatVisible && tutorActiveAssignment && String(tutorActiveAssignment.id)===String(m.assignmentId)){
+              const modalVisible = !document.getElementById('tutorChatModal').classList.contains('hidden');
+              if(modalVisible && tutorActiveAssignment && String(tutorActiveAssignment.id)===String(m.assignmentId)){
                 // mark as read immediately
                 setTutorLastRead(m.assignmentId, new Date(m.createdAt).getTime() || Date.now());
                 clearTutorUnread(m.assignmentId);
+                playChatReceiveSound();
               } else {
                 // increment unread for this assignment when tutor is not currently viewing this chat
                 incrementTutorUnread(m.assignmentId);
-                document.getElementById('tutor-new-message-audio')?.play().catch(()=>{});
+                playChatReceiveSound();
               }
             }
           }
@@ -1368,6 +1640,11 @@
       // Mark messages as read when closing the modal for the active assignment
       if (tutorActiveAssignment) {
         clearTutorUnread(tutorActiveAssignment.id);
+        tutorActiveAssignment = null; // Clear active assignment when closing modal
+      }
+      if (sseEventSource) {
+        try { sseEventSource.close(); } catch(_){}
+        sseEventSource = null;
       }
     }
 
@@ -1392,7 +1669,11 @@
         const res = await fetchWithAuth(`${API_BASE}/messages`, { method:'POST', body: JSON.stringify({ assignmentId: tutorActiveAssignment.id, studentId: tutorActiveAssignment.studentId, tutorId: effectiveTutorId, sender: 'tutor', content }) });
         const data = await res.json();
         if(!data.success){ console.error('Failed to send'); }
-        document.getElementById('tutor-send-audio')?.play().catch(()=>{});
+        // Play sound and reset timer
+        playChatSendSound();
+        resetInactivityTimer();
+        // Sending a message means you've read the thread
+        if (tutorActiveAssignment?.id) clearTutorUnread(tutorActiveAssignment.id);
       }catch(e){ console.error('Network error'); }
       finally {
         input.value='';
@@ -1438,6 +1719,8 @@
         render(document.getElementById('tutor-chat-history-modal'));
         // Opening messages means they are read
         clearTutorUnread(tutorActiveAssignment.id);
+        // Start inactivity timer when chat opens
+        resetInactivityTimer();
       }catch(e){ 
         if(history) history.innerHTML = '<div class="text-sm text-red-600">Network error</div>'; 
         if(historyMobile) historyMobile.innerHTML = '<div class="text-sm text-red-600">Network error</div>'; 
@@ -1474,7 +1757,11 @@
         const res = await fetchWithAuth(`${API_BASE}/messages`, { method:'POST', body: JSON.stringify({ assignmentId: tutorActiveAssignment.id, studentId: tutorActiveAssignment.studentId, tutorId: effectiveTutorId, sender: 'tutor', content }) });
         const data = await res.json();
         if(!data.success){ console.error('Failed to send'); }
-        document.getElementById('tutor-send-audio')?.play().catch(()=>{});
+        // Play sound and reset timer
+        playChatSendSound();
+        resetInactivityTimer();
+        // Sending a message means you've read the thread
+        if (tutorActiveAssignment?.id) clearTutorUnread(tutorActiveAssignment.id);
       }catch(e){ console.error('Network error'); }
       finally {
         input.value='';
@@ -1494,7 +1781,11 @@
         const res = await fetchWithAuth(`${API_BASE}/messages`, { method:'POST', body: JSON.stringify({ assignmentId: tutorActiveAssignment.id, studentId: tutorActiveAssignment.studentId, tutorId: effectiveTutorId, sender: 'tutor', content }) });
         const data = await res.json();
         if(!data.success){ console.error('Failed to send'); }
-        document.getElementById('tutor-send-audio')?.play().catch(()=>{});
+        // Play sound and reset timer
+        playChatSendSound();
+        resetInactivityTimer();
+        // Sending a message means you've read the thread
+        if (tutorActiveAssignment?.id) clearTutorUnread(tutorActiveAssignment.id);
       }catch(e){ console.error('Network error'); }
       finally {
         input.value='';
@@ -1614,16 +1905,18 @@
       }
     }
 
-    // Load recent activity (compose from assignments + pending payments)
+    // Load recent activity (compose from assignments + all payments + recent messages)
     async function loadRecentActivity() {
       const activityContainer = document.getElementById('recentActivity');
       try {
-        const [assignmentsRes, pendingPaymentsRes] = await Promise.all([
+        const [assignmentsRes, allPaymentsRes, recentMessagesRes] = await Promise.all([
           fetchWithAuth(`${API_BASE}/tutor/assignments`),
-          fetchWithAuth(`${API_BASE}/tutor/pending-payments`)
+          fetchWithAuth(`${API_BASE}/tutor/all-payments`),
+          fetchWithAuth(`${API_BASE}/tutor/recent-messages`)
         ]);
         const assignmentsData = await assignmentsRes.json();
-        const pendingPaymentsData = await pendingPaymentsRes.json();
+        const allPaymentsData = await allPaymentsRes.json();
+        const recentMessagesData = await recentMessagesRes.json();
         const activities = [];
 
         if (assignmentsData.success) {
@@ -1644,18 +1937,33 @@
           });
         }
 
-        if (pendingPaymentsData.success) {
-          (pendingPaymentsData.payments||[]).forEach(p => {
+        if (allPaymentsData.success) {
+          (allPaymentsData.payments||[]).forEach(p => {
+            const isApproved = p.status === 'completed' || p.status === 'approved';
+            const statusColor = isApproved ? 'text-emerald-500' : 'text-yellow-500';
+            const statusText = isApproved ? 'Deposit' : 'Payment awaiting approval';
             activities.push({
               ts: new Date(p.createdAt).getTime(),
-              icon: 'fas fa-credit-card text-yellow-500',
-              text: `Payment awaiting approval — ${p.user?.name||'Student'} • $${Number(p.amount||0).toFixed(2)} (${String(p.method||'').toUpperCase()})`
+              icon: `fas fa-wallet ${statusColor}`,
+              text: `${statusText} from ${p.userName||'Student'} — $${Number(p.amount||0).toFixed(2)} (${String(p.method||'').toUpperCase()})`
             });
           });
         }
 
+        if (recentMessagesData.success) {
+          (recentMessagesData.messages||[]).forEach(m => {
+            if (m.sender === 'student') {
+              activities.push({
+                ts: new Date(m.createdAt).getTime(),
+                icon: 'fas fa-comment-dots text-emerald-500',
+                text: `New message from ${m.studentName} on ${m.assignmentTitle}: "${m.content.substring(0, 50)}${m.content.length > 50 ? '...' : ''}"`
+              });
+            }
+          });
+        }
+
         activities.sort((a,b)=>b.ts-a.ts);
-        const top = activities.slice(0,10);
+        const top = activities.slice(0,15);
         if (top.length===0) {
           activityContainer.innerHTML = '<div class="text-sm text-gray-500">No recent activity</div>';
           return;
@@ -1668,9 +1976,13 @@
           </div>
         `).join('');
       } catch (e) {
+        console.error('Activity Error:', e);
         activityContainer.innerHTML = '<div class="text-sm text-red-600">Failed to load recent activity</div>';
       }
     }
+
+    // Track previous assignment count for notifications
+    let previousAssignmentsCount = null; // Start with null to detect first load
 
     // Load assignments
     async function loadAssignments() {
@@ -1681,6 +1993,15 @@
 
         if (result.success) {
           const assignments = Array.isArray(result.assignments) ? result.assignments : [];
+          const newCount = assignments.length;
+          
+          // Play notification sound if there are new assignments (after initial load)
+          if (previousAssignmentsCount !== null && newCount > previousAssignmentsCount) {
+            console.log('Playing notification - new assignment detected');
+            playAssignmentSound(); // Play the lofi mp3
+          }
+          previousAssignmentsCount = newCount;
+          
           currentAssignments = assignments;
           sidebarBadgeData.assignments = assignments.map(a => String(a?.id || a?._id || '')).filter(Boolean);
           const assignmentsSection = document.getElementById('assignments');
@@ -2001,6 +2322,9 @@
       }
     });
 
+    // Track previous students count for notifications
+    let previousStudentsCount = 0;
+
     // Load students
     async function loadStudents() {
       try {
@@ -2010,6 +2334,14 @@
 
         if (result.success) {
           const students = Array.isArray(result.students) ? result.students : [];
+          const newCount = students.length;
+          
+          // Play notification sound if new students registered
+          if (previousStudentsCount > 0 && newCount > previousStudentsCount) {
+            playNotificationSound('default');
+          }
+          previousStudentsCount = newCount;
+          
           currentStudents = students;
           sidebarBadgeData.students = students.map(s => String(s?.id || s?._id || s?.userId || '')).filter(Boolean);
           const studentsSection = document.getElementById('students');
@@ -2343,6 +2675,9 @@
       `).join('');
     }
 
+    // Track previous payments count for notifications
+    let previousPaymentsCount = 0;
+
     // Load pending payments
     async function loadPendingPayments() {
       try {
@@ -2352,6 +2687,14 @@
 
         if (result.success) {
           const payments = Array.isArray(result.payments) ? result.payments : [];
+          const newCount = payments.length;
+          
+          // Play notification sound if new payments submitted
+          if (previousPaymentsCount > 0 && newCount > previousPaymentsCount) {
+            playNotificationSound('payment');
+          }
+          previousPaymentsCount = newCount;
+          
           currentPayments = payments;
           sidebarBadgeData.payments = payments.map(p => String(p?.id || p?._id || '')).filter(Boolean);
           const paymentsSection = document.getElementById('payments');
@@ -2507,3 +2850,4 @@
   </script>
 </body>
 </html>
+

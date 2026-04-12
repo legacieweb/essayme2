@@ -25,7 +25,7 @@
     /* Font Customization */
     #dashboard-content {
       font-family: var(--dash-font-family, inherit);
-      color: #000000;
+      color: var(--text-main);
     }
 
     /* Chat Theme Variables */
@@ -117,7 +117,7 @@
     .border-gray-200 { border-color: var(--border-color) !important; }
     .border-gray-300 { border-color: #cbd5e1 !important; }
 
-    .dark :root { 
+    .dark { 
       color-scheme: dark;
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -596,6 +596,34 @@
     .animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     .cool-toast { animation: toast-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     .toast-exit { animation: toast-exit 0.4s ease-in forwards; }
+
+    /* Preloader Styles */
+    #payment-preloader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .dark #payment-preloader {
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 <style>
   :root {
@@ -617,6 +645,67 @@
 </head>
 
 <body class="bg-gray-100 font-sans relative" x-data x-init="document.documentElement.classList.toggle('dark', localStorage.getItem('theme')==='dark')">
+
+  <!-- Payment Modal (Loading/Success/Pending) -->
+  <div id="payment-modal" class="fixed inset-0 z-[9999] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xl animate-fade-in"></div>
+    <div id="payment-modal-content" class="relative glass-card bg-white/10 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up p-8 text-center">
+      <!-- Loading State -->
+      <div id="payment-loading-state" class="py-8">
+        <div class="spinner mx-auto mb-8"></div>
+        <h2 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-3">Processing Payment...</h2>
+        <p class="text-gray-600 dark:text-gray-300 font-bold leading-relaxed">Please wait while we update your balance</p>
+      </div>
+
+      <!-- Success State -->
+      <div id="payment-success-state" class="hidden py-4">
+        <div class="w-24 h-24 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-8 transform rotate-12">
+          <i class="fas fa-check-circle text-5xl text-emerald-500 transform -rotate-12 animate-bounce"></i>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-3">Success!</h2>
+        <p class="text-gray-600 dark:text-gray-300 font-bold mb-8">Your account has been credited.</p>
+        
+        <div class="bg-white/5 rounded-2xl p-6 mb-8 text-left border border-white/10">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</span>
+            <span class="font-black text-emerald-500" id="success-amount">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Method</span>
+            <span class="font-bold text-gray-900 dark:text-white" id="success-method">Paystack</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Reference</span>
+            <span class="font-mono text-[10px] text-gray-500 dark:text-gray-400" id="success-ref">REF-123456</span>
+          </div>
+        </div>
+        
+        <button onclick="window.location.reload()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/20 active:scale-95">
+          Great! Continue
+        </button>
+      </div>
+
+      <!-- Pending State (Proof Submitted) -->
+      <div id="payment-pending-state" class="hidden py-4">
+        <div class="w-24 h-24 bg-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-8 transform rotate-12">
+          <i class="fas fa-clock text-5xl text-amber-500 transform -rotate-12"></i>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-3">Submitted!</h2>
+        <p class="text-gray-600 dark:text-gray-300 font-bold mb-6">Payment proof submitted for review.</p>
+        
+        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-8">
+          <p class="text-amber-600 dark:text-amber-400 text-xs font-bold leading-relaxed">
+            <i class="fas fa-info-circle mr-2"></i>
+            Your account will be credited once verified by our team.
+          </p>
+        </div>
+        
+        <button onclick="window.location.reload()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+          Understood
+        </button>
+      </div>
+    </div>
+  </div>
 
 <!-- Dashboard Background Container -->
 <div id="dash-bg-container" class="fixed inset-0 -z-10 pointer-events-none overflow-hidden transition-all duration-500"></div>
@@ -779,38 +868,67 @@
 
       <!-- Additional Dashboard Content -->
       <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Academic News -->
+        <!-- Recent Activity -->
         <div class="glass-card p-8 rounded-3xl shadow-sm">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Academic News</h3>
-            <span class="text-xs font-bold text-blue-600 bg-blue-500/20 px-3 py-1.5 rounded-full uppercase">Latest Updates</span>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+            <span class="text-xs font-bold text-blue-600 bg-blue-500/20 px-3 py-1.5 rounded-full uppercase tracking-wider">Updates</span>
           </div>
-          <div id="academic-news-container" class="space-y-6">
-            <!-- News content here -->
+          <div id="recent-activity-container" class="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+            <!-- Activity items will be loaded here -->
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-history text-3xl mb-3 opacity-20"></i>
+              <p class="text-sm font-medium">Loading activity...</p>
+            </div>
           </div>
-          <button class="w-full mt-6 py-3 bg-white/10 dark:bg-slate-800/20 text-gray-600 dark:text-gray-300 font-bold rounded-2xl hover:bg-white/20 dark:hover:bg-slate-700/40 transition-all text-sm border border-white/10">
-            View All News
-          </button>
         </div>
 
         <!-- Quick Writing Tips -->
-        <div class="glass-card p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/40 to-blue-700/40 backdrop-blur-md -z-10"></div>
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold">Quick Writing Tips</h3>
-            <i class="fas fa-lightbulb text-yellow-300 text-xl animate-pulse"></i>
-          </div>
-          <div id="writing-tips-container" class="space-y-4">
-            <!-- Tips content here -->
-          </div>
-          <div class="mt-8 pt-6 border-t border-white/20">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs text-white/60">Writing Progress</p>
-                <p class="text-lg font-black">Advanced Level</p>
+        <div class="glass-card p-8 rounded-3xl shadow-2xl text-white relative overflow-hidden group">
+          <!-- Animated Background Blobs -->
+          <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-400/20 rounded-full blur-3xl group-hover:bg-blue-400/30 transition-all duration-700"></div>
+          <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-400/20 rounded-full blur-3xl group-hover:bg-indigo-400/30 transition-all duration-700"></div>
+          
+          <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/60 via-blue-700/60 to-purple-800/60 backdrop-blur-xl -z-10"></div>
+          
+          <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shadow-inner">
+                <i class="fas fa-lightbulb text-yellow-300 text-xl animate-pulse"></i>
               </div>
-              <div class="w-12 h-12 rounded-full border-4 border-white/20 flex items-center justify-center">
-                <span class="text-xs font-bold">85%</span>
+              <div>
+                <h3 class="text-xl font-black tracking-tight">Writing Tips</h3>
+                <p class="text-[10px] uppercase tracking-widest text-white/60 font-bold">Pro advice for you</p>
+              </div>
+            </div>
+            <button onclick="fetchDashboardContent()" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-all active:scale-90 border border-white/10" title="Get new tips">
+              <i class="fas fa-sync-alt text-xs"></i>
+            </button>
+          </div>
+
+          <div id="writing-tips-container" class="space-y-4 min-h-[120px]">
+            <!-- Tips content here -->
+            <div class="animate-pulse space-y-3">
+              <div class="h-16 bg-white/5 rounded-2xl"></div>
+              <div class="h-16 bg-white/5 rounded-2xl"></div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-white/10">
+            <div class="flex items-center justify-between">
+              <div class="space-y-1">
+                <p class="text-[10px] text-white/60 uppercase tracking-widest font-black">Your Level</p>
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg font-black tracking-tight">Advanced Writer</span>
+                  <i class="fas fa-award text-yellow-400 text-sm"></i>
+                </div>
+              </div>
+              <div class="relative w-14 h-14">
+                <svg class="w-full h-full transform -rotate-90">
+                  <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="4" fill="transparent" class="text-white/10" />
+                  <circle cx="28" cy="28" r="24" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="150.7" stroke-dashoffset="22.6" class="text-yellow-400" />
+                </svg>
+                <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black">85%</span>
               </div>
             </div>
           </div>
@@ -829,7 +947,10 @@
   
 <!-- Messages Section -->
 <section id="messages" class="p-6 pb-20 md:pb-6 hidden">
-  <script>document.write('<script src="' + (window.API_BASE || 'https://essayme2.onrender.com') + '/socket.io/socket.io.js"><\/script>');</script>
+  <script>
+    var socketAPI = window.API_BASE || 'https://essayme2.onrender.com';
+    document.write('<script src="' + socketAPI + '/socket.io/socket.io.js"><\/script>');
+  </script>
 
   <!-- Assignment Selection View -->
   <div id="assignment-selection-view" class="transition-all duration-500 ease-in-out">
@@ -989,10 +1110,16 @@
       </div>
       
       <p class="mt-4 text-[10px] font-bold text-gray-400">Minimum deposit is $10.00. Funds are added instantly after payment.</p>
+      
+      <div class="mt-8 flex justify-center">
+        <button onclick="showPaymentOptions()" class="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-2xl shadow-blue-500/20 active:scale-95 flex items-center">
+          Continue to Payment <i class="fas fa-arrow-right ml-3"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Payment Methods -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div id="paymentMethodsSection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 hidden transition-all duration-500 transform translate-y-8 opacity-0">
       
       <!-- Paystack -->
       <div class="glass-card p-8 rounded-3xl cursor-pointer hover:shadow-2xl transition-all border border-white/20 hover:border-blue-500/50 group relative overflow-hidden"
@@ -1035,7 +1162,7 @@
           <h3 class="text-lg font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">CashApp</h3>
           <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-4 leading-relaxed uppercase tracking-wider">Bitcoin Deposits Only</p>
           <div class="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-orange-500/20">
-            ⏳ Manual Approval
+            Manual Approval
           </div>
         </div>
       </div>
@@ -1051,7 +1178,7 @@
           <h3 class="text-lg font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">Bitcoin</h3>
           <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-4 leading-relaxed uppercase tracking-wider">Direct Crypto Transfer</p>
           <div class="inline-block px-4 py-1.5 bg-orange-500/20 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-orange-500/20">
-            ⏳ Manual Approval
+            Manual Approval
           </div>
         </div>
       </div>
@@ -1164,27 +1291,27 @@
   <!-- Name, Bio, Email, Phone -->
   <div class="mt-6 grid lg:grid-cols-2 gap-6">
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">Name</label>
-      <input type="text" id="edit-username" class="w-full border rounded-lg p-3 shadow-sm">
+      <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Name</label>
+      <input type="text" id="edit-username" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-3 shadow-sm dark:text-white">
     </div>
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">Bio</label>
-      <textarea id="edit-bio" rows="4" class="w-full border rounded-lg p-3 shadow-sm"></textarea>
+      <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Bio</label>
+      <textarea id="edit-bio" rows="4" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-3 shadow-sm dark:text-white"></textarea>
     </div>
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">Email</label>
-      <input type="email" id="edit-email" class="w-full border rounded-lg p-3 shadow-sm" placeholder="Enter email">
+      <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Email</label>
+      <input type="email" id="edit-email" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-3 shadow-sm dark:text-white" placeholder="Enter email">
     </div>
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">Phone Number</label>
-      <input type="text" id="edit-phone" class="w-full border rounded-lg p-3 shadow-sm" placeholder="e.g. +1 555 123 4567">
+      <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Phone Number</label>
+      <input type="text" id="edit-phone" class="w-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-3 shadow-sm dark:text-white" placeholder="e.g. +1 555 123 4567">
     </div>
   </div>
 
   <!-- Password Update -->
   <div class="mt-6">
-    <label class="block text-gray-700 font-semibold mb-2">Change Password</label>
-    <button onclick="openPasswordPopup()" class="w-full border rounded-lg p-3 text-left shadow-sm bg-gray-100">
+    <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2">Change Password</label>
+    <button onclick="openPasswordPopup()" class="w-full border dark:border-slate-700 rounded-lg p-3 text-left shadow-sm bg-gray-100 dark:bg-slate-800 dark:text-gray-300">
       Update Password
     </button>
   </div>
@@ -1231,27 +1358,38 @@
 </div>
 
   <!-- Profile Picture Popup (replaced with simple file picker) -->
-  <div id="profile-picture-popup" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Change Profile Picture</h3>
-      <input type="file" id="popup-profile-upload" accept="image/*" class="w-full border rounded p-2" />
-      <div class="flex justify-end space-x-2 mt-4">
-        <button class="px-4 py-2 bg-gray-200 rounded" onclick="closeProfilePicturePopup()">Cancel</button>
-        <button class="px-4 py-2 bg-blue-600 text-white rounded" onclick="savePopupProfileImage()">Save</button>
+  <div id="profile-picture-popup" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-[80]">
+    <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-white/20">
+      <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-tight">Change Profile Picture</h3>
+      <div class="space-y-4">
+        <div class="relative group">
+          <input type="file" id="popup-profile-upload" accept="image/*" 
+                 class="w-full text-xs text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300" />
+        </div>
+      </div>
+      <div class="flex justify-end space-x-3 mt-8">
+        <button class="px-6 py-2 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 font-bold rounded-xl hover:bg-gray-200 transition-all" onclick="closeProfilePicturePopup()">Cancel</button>
+        <button class="px-6 py-2 bg-blue-600 text-white font-black rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all active:scale-95" onclick="savePopupProfileImage()">Save Photo</button>
       </div>
     </div>
   </div>
 
   <!-- Password Update Popup -->
-  <div id="password-popup" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-      <h3 class="text-lg font-semibold text-gray-800">Change Password</h3>
-      <input type="password" id="current-password" class="w-full border rounded-lg p-3 shadow-sm mt-2" placeholder="Current Password">
-      <input type="password" id="new-password" class="w-full border rounded-lg p-3 shadow-sm mt-2" placeholder="New Password">
-      <input type="password" id="confirm-password" class="w-full border rounded-lg p-3 shadow-sm mt-2" placeholder="Confirm Password">
-      <button class="text-blue-500 mt-2" onclick="forgotPassword()">Forgot Password?</button>
-      <button class="mt-4 w-full px-4 py-2 bg-green-500 text-white rounded-lg" onclick="saveNewPassword()">Change Password</button>
-      <button class="mt-2 w-full px-4 py-2 bg-gray-300 rounded-lg" onclick="closePasswordPopup()">Cancel</button>
+  <div id="password-popup" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-[80]">
+    <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-white/20">
+      <h3 class="text-xl font-black text-gray-900 dark:text-white mb-6 uppercase tracking-tight">Security Update</h3>
+      <div class="space-y-4">
+        <input type="password" id="current-password" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="Current Password">
+        <input type="password" id="new-password" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="New Password">
+        <input type="password" id="confirm-password" class="w-full bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" placeholder="Confirm Password">
+      </div>
+      <div class="mt-4 text-right">
+        <button class="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors" onclick="forgotPassword()">Forgot Password?</button>
+      </div>
+      <div class="flex flex-col space-y-3 mt-8">
+        <button class="w-full py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95" onclick="saveNewPassword()">Update Password</button>
+        <button class="w-full py-2 text-gray-400 font-bold text-xs hover:text-gray-600 transition-colors" onclick="closePasswordPopup()">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -1273,9 +1411,17 @@
               <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-500" id="smsNotifications">
             </label>
             <label class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
-              <span class="text-gray-600 dark:text-gray-400">Push Notifications</span>
+              <div>
+                <span class="text-gray-600 dark:text-gray-400 block font-medium">Push Notifications & Sounds</span>
+                <span class="text-[10px] text-gray-500 dark:text-gray-500">Enable sounds for messages and order updates</span>
+              </div>
               <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-500" checked id="pushNotifications">
             </label>
+            <div class="p-3 border-l-4 border-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-r-lg">
+              <p class="text-[10px] text-amber-700 dark:text-amber-400">
+                <strong>Note:</strong> Browsers require at least one interaction (like clicking a button) before audio can play. Enable this and click anywhere to allow sounds.
+              </p>
+            </div>
             <label class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
               <span class="text-gray-600 dark:text-gray-400">Order Updates</span>
               <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-500" checked id="orderNotifications">
@@ -1439,232 +1585,264 @@
   </main>
 
   <!-- Order Modal -->
-  <div id="orderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all duration-300">
-    <div class="glass-card dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden border border-white/20 dark:border-gray-800 modal-content">
+  <div id="orderModal" class="fixed inset-0 bg-white dark:bg-slate-900 z-[100] hidden flex flex-col transition-all duration-300">
+    <div class="w-full h-full flex flex-col overflow-hidden modal-content">
       <!-- Modal Header -->
-      <div class="px-8 py-6 flex justify-between items-center bg-gradient-to-r from-blue-600/5 to-indigo-600/5 dark:from-blue-600/10 dark:to-indigo-600/10 border-b dark:border-gray-800">
+      <div class="px-6 py-4 flex justify-between items-center bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 sticky top-0 z-20">
         <div class="flex items-center space-x-4">
-          <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <i class="fas fa-shopping-cart text-white text-xl"></i>
+          <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <i class="fas fa-shopping-cart text-white text-lg"></i>
           </div>
           <div>
-            <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Place New Order</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Professional help is just a few clicks away</p>
+            <h2 class="text-xl font-black text-gray-900 dark:text-white tracking-tight">Place New Order</h2>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Professional Help</p>
           </div>
         </div>
-        <button onclick="closeOrderModal()" class="group w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-red-500 hover:text-white transition-all duration-300">
+        <button onclick="closeOrderModal()" class="group w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:bg-red-500 hover:text-white transition-all duration-300">
           <i class="fas fa-times text-lg group-hover:rotate-90 transition-transform"></i>
         </button>
       </div>
 
-      <!-- Stepper -->
-      <div class="px-8 py-8 bg-gray-50/50 dark:bg-gray-900/50 border-b dark:border-gray-800">
-        <div class="flex items-center justify-between max-w-2xl mx-auto relative">
-          <!-- Progress Line Background -->
-          <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 -translate-y-1/2 z-0"></div>
-          <!-- Dynamic Progress Line -->
-          <div id="stepper-progress" class="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%"></div>
-          
-          <!-- Steps -->
-          <div class="step-container group relative z-10" onclick="goToStep(1)">
-            <div class="step-circle w-10 h-10 rounded-full bg-white dark:bg-gray-900 border-2 border-blue-600 flex items-center justify-center font-bold text-blue-600 transition-all duration-300 shadow-md active" data-step="1">1</div>
-            <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-blue-600 whitespace-nowrap">Course</span>
-          </div>
-          <div class="step-container group relative z-10" onclick="goToStep(2)">
-            <div class="step-circle w-10 h-10 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 flex items-center justify-center font-bold text-gray-400 transition-all duration-300 shadow-sm" data-step="2">2</div>
-            <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Type</span>
-          </div>
-          <div class="step-container group relative z-10" onclick="goToStep(3)">
-            <div class="step-circle w-10 h-10 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 flex items-center justify-center font-bold text-gray-400 transition-all duration-300 shadow-sm" data-step="3">3</div>
-            <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Details</span>
-          </div>
-          <div class="step-container group relative z-10" onclick="goToStep(4)">
-            <div class="step-circle w-10 h-10 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 flex items-center justify-center font-bold text-gray-400 transition-all duration-300 shadow-sm" data-step="4">4</div>
-            <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Files</span>
-          </div>
-          <div class="step-container group relative z-10" onclick="goToStep(5)">
-            <div class="step-circle w-10 h-10 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 flex items-center justify-center font-bold text-gray-400 transition-all duration-300 shadow-sm" data-step="5">5</div>
-            <span class="absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Review</span>
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Stepper (Responsive) -->
+        <div class="px-6 py-6 bg-gray-50/50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-800">
+          <div class="flex items-center justify-between max-w-2xl mx-auto relative px-4">
+            <!-- Progress Line Background -->
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 dark:bg-slate-800 -translate-y-1/2 z-0"></div>
+            <!-- Dynamic Progress Line -->
+            <div id="stepper-progress" class="absolute top-1/2 left-0 h-0.5 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%"></div>
+            
+            <!-- Steps -->
+            <div class="step-container group relative z-10" onclick="goToStep(1)">
+              <div class="step-circle w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-blue-600 flex items-center justify-center font-bold text-xs text-blue-600 transition-all duration-300 shadow-md active" data-step="1">1</div>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-blue-600 whitespace-nowrap">Course</span>
+            </div>
+            <div class="step-container group relative z-10" onclick="goToStep(2)">
+              <div class="step-circle w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 flex items-center justify-center font-bold text-xs text-gray-400 transition-all duration-300 shadow-sm" data-step="2">2</div>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Type</span>
+            </div>
+            <div class="step-container group relative z-10" onclick="goToStep(3)">
+              <div class="step-circle w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 flex items-center justify-center font-bold text-xs text-gray-400 transition-all duration-300 shadow-sm" data-step="3">3</div>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Details</span>
+            </div>
+            <div class="step-container group relative z-10" onclick="goToStep(4)">
+              <div class="step-circle w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 flex items-center justify-center font-bold text-xs text-gray-400 transition-all duration-300 shadow-sm" data-step="4">4</div>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Files</span>
+            </div>
+            <div class="step-container group relative z-10" onclick="goToStep(5)">
+              <div class="step-circle w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 flex items-center justify-center font-bold text-xs text-gray-400 transition-all duration-300 shadow-sm" data-step="5">5</div>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap">Review</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Modal Content -->
-      <div class="flex-1 overflow-y-auto p-8">
-        <form id="orderForm" class="space-y-8">
-          
-          <!-- Step 1: Course Selection -->
-          <div id="step-1" class="order-step space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="text-center space-y-2">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">What can we help you with?</h3>
-              <p class="text-gray-500 dark:text-gray-400">Select the subject area for your assignment</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Liberal Arts -->
-              <div class="group p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-500/30">
-                <div class="flex items-center space-x-4 mb-4">
-                  <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-book-open"></i>
-                  </div>
-                  <h4 class="font-bold text-gray-900 dark:text-white">Liberal Arts</h4>
-                </div>
-                <select id="liberalArtsSubject" class="w-full p-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-300 transition-all">
-                  <option value="">Select Subject</option>
-                  <option value="English Literature">English Literature</option>
-                  <option value="History">History</option>
-                  <option value="Philosophy">Philosophy</option>
-                  <option value="Psychology">Psychology</option>
-                  <option value="Sociology">Sociology</option>
-                  <option value="Political Science">Political Science</option>
-                </select>
-              </div>
+        <!-- Modal Content (Scrollable) -->
+        <div class="flex-1 overflow-y-auto bg-white dark:bg-slate-900 px-6 py-10">
+          <div class="max-w-4xl mx-auto">
+            <form id="orderForm" class="space-y-12">
               
-              <!-- Business -->
-              <div class="group p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 hover:border-indigo-500/30">
-                <div class="flex items-center space-x-4 mb-4">
-                  <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-briefcase"></i>
-                  </div>
-                  <h4 class="font-bold text-gray-900 dark:text-white">Business</h4>
-                </div>
-                <select id="businessSubject" class="w-full p-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-gray-300 transition-all">
-                  <option value="">Select Subject</option>
-                  <option value="Business Administration">Business Administration</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Economics">Economics</option>
-                  <option value="Management">Management</option>
-                  <option value="Accounting">Accounting</option>
-                </select>
-              </div>
-              
-              <!-- Sciences -->
-              <div class="group p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 hover:border-emerald-500/30">
-                <div class="flex items-center space-x-4 mb-4">
-                  <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-microscope"></i>
-                  </div>
-                  <h4 class="font-bold text-gray-900 dark:text-white">Sciences</h4>
-                </div>
-                <select id="scienceSubject" class="w-full p-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 text-gray-700 dark:text-gray-300 transition-all">
-                  <option value="">Select Subject</option>
-                  <option value="Biology">Biology</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Environmental Science">Environmental Science</option>
-                  <option value="Health Sciences">Health Sciences</option>
-                  <option value="Nursing">Nursing</option>
-                </select>
-              </div>
-              
-              <!-- Technical -->
-              <div class="group p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 hover:border-purple-500/30">
-                <div class="flex items-center space-x-4 mb-4">
-                  <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-laptop-code"></i>
-                  </div>
-                  <h4 class="font-bold text-gray-900 dark:text-white">Technical</h4>
-                </div>
-                <select id="technicalSubject" class="w-full p-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-700 dark:text-gray-300 transition-all">
-                  <option value="">Select Subject</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Statistics">Statistics</option>
-                  <option value="Calculus">Calculus</option>
-                </select>
-              </div>
-
-              <!-- Other -->
-              <div class="md:col-span-2 p-6 bg-gradient-to-r from-gray-50 to-slate-100 dark:from-gray-800/50 dark:to-gray-900/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 text-center">Don't see your subject? Enter it below</label>
-                <div class="relative max-w-md mx-auto">
-                  <input type="text" id="customSubject" placeholder="Enter custom subject" 
-                         class="w-full p-4 pl-12 bg-white dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 shadow-sm transition-all dark:text-white">
-                  <i class="fas fa-pencil-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2: Assignment Type -->
-          <div id="step-2" class="order-step hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="text-center space-y-2">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Choose Assignment Type</h3>
-              <p class="text-gray-500 dark:text-gray-400 font-medium">Select the type of work and specify the length</p>
-            </div>
-
-            <div class="space-y-6">
-              <!-- Writing Assignments -->
-              <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div class="flex items-center justify-between mb-6">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                      <i class="fas fa-pen-nib"></i>
-                    </div>
-                    <h4 class="font-bold text-gray-900 dark:text-white text-lg tracking-tight">Writing Assignments</h4>
-                  </div>
-                  <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full text-center">Admin will review price</span>
+              <!-- Step 1: Course Selection -->
+              <div id="step-1" class="order-step space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="text-center space-y-3">
+                  <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">What can we help you with?</h3>
+                  <p class="text-gray-500 dark:text-gray-400 font-medium">Select the subject area for your assignment</p>
                 </div>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <label class="group relative cursor-pointer">
-                    <input type="radio" name="assignmentType" value="essay" data-price="custom" data-category="writing" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
-                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Essay</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Liberal Arts -->
+                  <div class="group p-6 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 hover:border-blue-500 transition-all duration-300">
+                    <div class="flex items-center space-x-4 mb-5">
+                      <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-blue-600 shadow-sm border border-gray-100 dark:border-slate-800">
+                        <i class="fas fa-book-open text-xl"></i>
+                      </div>
+                      <h4 class="font-bold text-gray-900 dark:text-white text-lg">Liberal Arts</h4>
                     </div>
-                  </label>
-                  <label class="group relative cursor-pointer">
-                    <input type="radio" name="assignmentType" value="research-paper" data-price="custom" data-category="writing" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
-                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Research</span>
+                    <select id="liberalArtsSubject" class="w-full p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-200 font-medium shadow-sm transition-all">
+                      <option value="">Select Subject</option>
+                      <option value="English Literature">English Literature</option>
+                      <option value="History">History</option>
+                      <option value="Philosophy">Philosophy</option>
+                      <option value="Psychology">Psychology</option>
+                      <option value="Sociology">Sociology</option>
+                      <option value="Political Science">Political Science</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Business -->
+                  <div class="group p-6 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 hover:border-indigo-500 transition-all duration-300">
+                    <div class="flex items-center space-x-4 mb-5">
+                      <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-indigo-600 shadow-sm border border-gray-100 dark:border-slate-800">
+                        <i class="fas fa-briefcase text-xl"></i>
+                      </div>
+                      <h4 class="font-bold text-gray-900 dark:text-white text-lg">Business</h4>
                     </div>
-                  </label>
-                  <label class="group relative cursor-pointer">
-                    <input type="radio" name="assignmentType" value="discussion-post" data-price="custom" data-category="writing" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
-                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Discussion</span>
+                    <select id="businessSubject" class="w-full p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-gray-200 font-medium shadow-sm transition-all">
+                      <option value="">Select Subject</option>
+                      <option value="Business Administration">Business Administration</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Economics">Economics</option>
+                      <option value="Management">Management</option>
+                      <option value="Accounting">Accounting</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Sciences -->
+                  <div class="group p-6 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 hover:border-emerald-500 transition-all duration-300">
+                    <div class="flex items-center space-x-4 mb-5">
+                      <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-emerald-600 shadow-sm border border-gray-100 dark:border-slate-800">
+                        <i class="fas fa-microscope text-xl"></i>
+                      </div>
+                      <h4 class="font-bold text-gray-900 dark:text-white text-lg">Sciences</h4>
                     </div>
-                  </label>
-                  <label class="group relative cursor-pointer">
-                    <input type="radio" name="assignmentType" value="summary" data-price="custom" data-category="writing" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
-                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Summary</span>
+                    <select id="scienceSubject" class="w-full p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 text-gray-700 dark:text-gray-200 font-medium shadow-sm transition-all">
+                      <option value="">Select Subject</option>
+                      <option value="Biology">Biology</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="Environmental Science">Environmental Science</option>
+                      <option value="Health Sciences">Health Sciences</option>
+                      <option value="Nursing">Nursing</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Technical -->
+                  <div class="group p-6 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 hover:border-purple-500 transition-all duration-300">
+                    <div class="flex items-center space-x-4 mb-5">
+                      <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-purple-600 shadow-sm border border-gray-100 dark:border-slate-800">
+                        <i class="fas fa-laptop-code text-xl"></i>
+                      </div>
+                      <h4 class="font-bold text-gray-900 dark:text-white text-lg">Technical</h4>
                     </div>
-                  </label>
+                    <select id="technicalSubject" class="w-full p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-700 dark:text-gray-200 font-medium shadow-sm transition-all">
+                      <option value="">Select Subject</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Engineering">Engineering</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Statistics">Statistics</option>
+                      <option value="Calculus">Calculus</option>
+                    </select>
+                  </div>
+
+                  <!-- Custom Subject -->
+                  <div class="md:col-span-2 p-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/50 rounded-3xl border border-blue-100 dark:border-slate-700 shadow-sm">
+                    <div class="text-center space-y-4 max-w-lg mx-auto">
+                      <h4 class="font-bold text-gray-900 dark:text-white">Don't see your subject?</h4>
+                      <div class="relative">
+                        <input type="text" id="customSubject" placeholder="Enter custom subject name" 
+                               class="w-full p-4 pl-12 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 shadow-sm transition-all dark:text-white font-medium">
+                        <i class="fas fa-pencil-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2: Assignment Type (Theme Aware) -->
+              <div id="step-2" class="order-step hidden space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div class="text-center space-y-3">
+                  <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Choose Assignment Type</h3>
+                  <p class="text-gray-500 dark:text-gray-400 font-medium">Select the type of work and specify the length</p>
+                </div>
+
+                <div class="space-y-8">
+                  <!-- Writing -->
+                  <div class="p-8 bg-white dark:bg-slate-800/30 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-8">
+                      <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <i class="fas fa-pen-nib text-xl"></i>
+                        </div>
+                        <h4 class="font-black text-gray-900 dark:text-white text-xl tracking-tight uppercase tracking-widest text-sm">Writing Assignments</h4>
+                      </div>
+                      <span class="px-4 py-1.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-[10px] font-black rounded-full uppercase tracking-widest">Quote Required</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <label class="group relative cursor-pointer">
+                        <input type="radio" name="assignmentType" value="essay" data-price="custom" data-category="writing" class="sr-only peer">
+                        <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:shadow-md">
+                          <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Essay</span>
+                        </div>
+                      </label>
+                      <label class="group relative cursor-pointer">
+                        <input type="radio" name="assignmentType" value="research-paper" data-price="custom" data-category="writing" class="sr-only peer">
+                        <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:shadow-md">
+                          <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Research</span>
+                        </div>
+                      </label>
+                      <label class="group relative cursor-pointer">
+                        <input type="radio" name="assignmentType" value="discussion-post" data-price="custom" data-category="writing" class="sr-only peer">
+                        <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:shadow-md">
+                          <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Discussion</span>
+                        </div>
+                      </label>
+                      <label class="group relative cursor-pointer">
+                        <input type="radio" name="assignmentType" value="summary" data-price="custom" data-category="writing" class="sr-only peer">
+                        <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 group-hover:shadow-md">
+                          <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-blue-600 dark:peer-checked:text-blue-400">Summary</span>
+                        </div>
+                      </label>
                 </div>
               </div>
 
               <!-- Technical Assignments -->
-              <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div class="flex items-center justify-between mb-6">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                      <i class="fas fa-atom"></i>
+              <div class="p-8 bg-white dark:bg-slate-800/30 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                  <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                      <i class="fas fa-atom text-xl"></i>
                     </div>
-                    <h4 class="font-bold text-gray-900 dark:text-white text-lg tracking-tight">Technical Assignments</h4>
+                    <h4 class="font-black text-gray-900 dark:text-white text-xl tracking-tight uppercase tracking-widest text-sm">Technical Assignments</h4>
                   </div>
-                  <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold rounded-full">Custom Pricing</span>
+                  <span class="px-4 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-[10px] font-black rounded-full uppercase tracking-widest">Custom Quote</span>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <label class="group relative cursor-pointer">
                     <input type="radio" name="assignmentType" value="math-problems" data-price="custom" data-category="technical" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
+                    <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:shadow-md">
                       <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-purple-600 dark:peer-checked:text-purple-400">Mathematics</span>
                     </div>
                   </label>
                   <label class="group relative cursor-pointer">
                     <input type="radio" name="assignmentType" value="programming" data-price="custom" data-category="technical" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
+                    <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:shadow-md">
                       <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-purple-600 dark:peer-checked:text-purple-400">Programming</span>
                     </div>
                   </label>
                   <label class="group relative cursor-pointer">
                     <input type="radio" name="assignmentType" value="statistics" data-price="custom" data-category="technical" class="sr-only peer">
-                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:bg-gray-100 dark:group-hover:bg-gray-900">
+                    <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50 dark:peer-checked:bg-purple-900/20 group-hover:shadow-md">
                       <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-purple-600 dark:peer-checked:text-purple-400">Statistics</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Course Help -->
+              <div class="p-8 bg-white dark:bg-slate-800/30 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                  <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                      <i class="fas fa-graduation-cap text-xl"></i>
+                    </div>
+                    <h4 class="font-black text-gray-900 dark:text-white text-xl tracking-tight uppercase tracking-widest text-sm">Course Assistance</h4>
+                  </div>
+                  <span class="px-4 py-1.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-black rounded-full uppercase tracking-widest">Ongoing Help</span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label class="group relative cursor-pointer">
+                    <input type="radio" name="assignmentType" value="online-course" data-price="custom" data-category="course" class="sr-only peer">
+                    <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 group-hover:shadow-md">
+                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-emerald-600 dark:peer-checked:text-emerald-400">Full Online Course</span>
+                    </div>
+                  </label>
+                  <label class="group relative cursor-pointer">
+                    <input type="radio" name="assignmentType" value="exam-prep" data-price="custom" data-category="course" class="sr-only peer">
+                    <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-transparent rounded-2xl text-center transition-all peer-checked:border-emerald-600 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 group-hover:shadow-md">
+                      <span class="block text-sm font-bold text-gray-700 dark:text-gray-300 peer-checked:text-emerald-600 dark:peer-checked:text-emerald-400">Exam Preparation</span>
                     </div>
                   </label>
                 </div>
@@ -1715,214 +1893,143 @@
           </div>
 
           <!-- Step 3: Assignment Details -->
-          <div id="step-3" class="order-step hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="text-center space-y-2">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Assignment Details</h3>
+          <div id="step-3" class="order-step hidden space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-3">
+              <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Assignment Details</h3>
               <p class="text-gray-500 dark:text-gray-400 font-medium">Provide the specifics of your task</p>
             </div>
             
-            <div class="space-y-6">
-              <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Assignment Title</label>
+            <div class="space-y-8 max-w-3xl mx-auto">
+              <div class="space-y-3">
+                <label class="block text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Assignment Title *</label>
                 <input type="text" id="assignmentTitle" 
-                       class="w-full p-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400" 
-                       placeholder="e.g., Analysis of Global Warming Trends" required>
+                       class="w-full p-5 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-bold placeholder-gray-400 shadow-sm" 
+                       placeholder="e.g. Critical Analysis of Shakespeare's Hamlet" required>
               </div>
-              
-              <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Detailed Instructions</label>
-                <textarea id="assignmentDescription" rows="5" 
-                          class="w-full p-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 resize-none" 
-                          placeholder="Provide as much detail as possible to get the best result..." required></textarea>
+
+              <div class="space-y-3">
+                <label class="block text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Detailed Instructions *</label>
+                <textarea id="assignmentDescription" rows="6" 
+                          class="w-full p-5 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-medium placeholder-gray-400 shadow-sm resize-none" 
+                          placeholder="Provide all details, prompts, and requirements..." required></textarea>
               </div>
-              
-              <div class="space-y-2">
-                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Formatting & Special Requirements (Optional)</label>
-                <textarea id="additionalRequirements" rows="2" 
-                          class="w-full p-4 bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder-gray-400 resize-none" 
-                          placeholder="Citation style (APA, MLA), specific sources, font size..."></textarea>
+
+              <div class="space-y-3">
+                <label class="block text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Formatting Requirements</label>
+                <input type="text" id="additionalRequirements" 
+                       class="w-full p-5 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-medium placeholder-gray-400 shadow-sm" 
+                       placeholder="APA, MLA, 12pt Font, etc.">
               </div>
             </div>
           </div>
 
-          <!-- Step 4: File Upload & Deadline -->
+          <!-- Step 4: Files & Deadline -->
           <div id="step-4" class="order-step hidden space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="space-y-6">
-              <div class="text-center space-y-2">
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Materials & Timeline</h3>
-                <p class="text-gray-500 dark:text-gray-400 font-medium">Upload your files and set your deadline</p>
-              </div>
-              
-              <div class="relative group">
-                <input type="file" id="fileUpload" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.xlsx,.xls,.ppt,.pptx" class="hidden">
-                <div onclick="document.getElementById('fileUpload').click()" 
-                     class="border-3 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl p-12 text-center cursor-pointer group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10 transition-all duration-300">
-                  <div class="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-blue-600 dark:text-blue-400"></i>
-                  </div>
-                  <p class="text-xl text-gray-900 dark:text-white font-bold">Drop files here or click to browse</p>
-                  <p class="text-gray-500 dark:text-gray-400 font-medium mt-2">Support: PDF, DOCX, Images, etc. (Max 50MB)</p>
-                </div>
-                <div id="fileList" class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-              </div>
+            <div class="text-center space-y-3">
+              <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Timeline & Materials</h3>
+              <p class="text-gray-500 dark:text-gray-400 font-medium">When do you need it and what files should we use?</p>
             </div>
 
-            <div class="p-8 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-gray-100 dark:border-gray-800 space-y-8">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
-                <div class="space-y-3">
-                  <label class="flex items-center space-x-2 text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
-                    <i class="fas fa-calendar-alt text-blue-600"></i>
-                    <span>Due Date & Time *</span>
-                  </label>
-                  <input type="datetime-local" id="dueDateTime" 
-                         class="w-full p-4 bg-white dark:bg-gray-900 border-2 border-transparent focus:border-blue-500 rounded-2xl transition-all outline-none text-gray-900 dark:text-white font-bold shadow-sm" required>
+            <div class="space-y-10 max-w-3xl mx-auto">
+              <!-- File Upload -->
+              <div class="relative group">
+                <input type="file" id="fileUpload" multiple class="hidden">
+                <div onclick="document.getElementById('fileUpload').click()" 
+                     class="border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-3xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
+                  <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-cloud-upload-alt text-2xl text-blue-600 dark:text-blue-400"></i>
+                  </div>
+                  <p class="text-lg font-bold text-gray-900 dark:text-white">Upload Reference Materials</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Support: PDF, DOCX, Images (Max 50MB)</p>
                 </div>
-                
-                <!-- Proposed Budget Section (Toggled via JS) -->
-                <div id="proposedBudgetSection" class="hidden space-y-3">
-                  <label class="flex items-center space-x-2 text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
-                    <i class="fas fa-hand-holding-usd text-emerald-600"></i>
-                    <span>Your Proposed Budget ($) *</span>
-                  </label>
+                <div id="fileList" class="mt-4 grid grid-cols-1 gap-2"></div>
+              </div>
+
+              <!-- Deadline & Budget -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  <label class="block text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Deadline *</label>
+                  <input type="datetime-local" id="dueDateTime" 
+                         class="w-full p-5 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-bold shadow-sm" required>
+                </div>
+                <div id="proposedBudgetSection" class="space-y-3 hidden">
+                  <label class="block text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest">Proposed Budget ($)</label>
                   <div class="relative">
-                    <input type="number" id="proposedBudget" min="1" placeholder="Ex: 50"
-                           class="w-full p-4 pl-10 bg-white dark:bg-gray-900 border-2 border-transparent focus:border-emerald-500 rounded-2xl transition-all outline-none text-gray-900 dark:text-white font-black shadow-sm">
+                    <input type="number" id="proposedBudget" placeholder="50"
+                           class="w-full p-5 pl-10 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white font-black shadow-sm">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
                   </div>
                 </div>
               </div>
 
-              <div class="bg-blue-600/5 dark:bg-blue-400/5 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30 flex items-start space-x-4">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
-                  <i class="fas fa-shield-alt text-white"></i>
-                </div>
-                <div>
-                  <h5 class="text-sm font-bold text-blue-900 dark:text-blue-200 mb-1">Pricing Policy</h5>
-                  <p class="text-xs text-blue-700/80 dark:text-blue-300/80 leading-relaxed font-medium">
-                    The final price will be confirmed by our admin after reviewing your instructions. Your proposed budget helps us match you with the best expert.
-                  </p>
-                </div>
-              </div>
-
-              <div id="timeWarning" class="hidden mt-6 p-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl text-red-800 dark:text-red-300 flex items-start space-x-4 animate-in fade-in slide-in-from-top-2">
-                <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center flex-shrink-0">
-                  <i class="fas fa-exclamation-triangle text-white"></i>
-                </div>
-                <div>
-                  <p class="font-bold text-lg leading-tight">Deadline too close!</p>
-                  <p class="text-sm font-medium mt-1">We need at least 2 hours to ensure quality work. Please select a later time.</p>
-                </div>
+              <div id="timeWarning" class="hidden p-5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-2xl text-red-600 flex items-center space-x-4">
+                <i class="fas fa-exclamation-triangle text-xl"></i>
+                <p class="text-sm font-bold">Minimum lead time is 2 hours. Please adjust your deadline.</p>
               </div>
             </div>
           </div>
 
-          <!-- Step 5: Final Confirmation & Review -->
-          <div id="step-5" class="order-step hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="text-center space-y-2">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Review Your Order</h3>
-              <p class="text-gray-500 dark:text-gray-400 font-medium">Double-check everything before submitting</p>
+          <!-- Step 5: Review -->
+          <div id="step-5" class="order-step hidden space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-3">
+              <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Confirm Your Order</h3>
+              <p class="text-gray-500 dark:text-gray-400 font-medium">Review your details before submission</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <!-- Order Summary Details -->
-              <div class="lg:col-span-3 space-y-4">
-                <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
-                  <div class="flex items-start justify-between pb-6 border-b dark:border-gray-700">
-                    <div class="space-y-1">
-                      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Subject & Type</p>
-                      <h4 id="review-subject" class="text-xl font-bold text-gray-900 dark:text-white">-</h4>
-                      <p id="review-type" class="text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg inline-block mt-2">-</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div class="lg:col-span-2 space-y-6">
+                <div class="p-8 bg-gray-50 dark:bg-slate-800/30 rounded-3xl border border-gray-100 dark:border-slate-800 space-y-8">
+                  <div class="flex justify-between items-start pb-6 border-b border-gray-200 dark:border-slate-800">
+                    <div>
+                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Subject</p>
+                      <h4 id="review-subject" class="text-xl font-black text-gray-900 dark:text-white">-</h4>
                     </div>
                     <div class="text-right">
-                      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Length</p>
-                      <p id="review-length" class="text-sm font-bold text-gray-900 dark:text-white mt-1">1 Page</p>
+                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Type</p>
+                      <p id="review-type" class="text-sm font-bold text-blue-600 dark:text-blue-400">-</p>
                     </div>
                   </div>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Assignment Title</p>
-                      <p id="review-title" class="text-lg font-bold text-gray-800 dark:text-gray-200 leading-tight truncate">-</p>
+                  <div class="grid grid-cols-2 gap-8">
+                    <div>
+                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Title</p>
+                      <p id="review-title" class="text-sm font-bold text-gray-900 dark:text-white">-</p>
                     </div>
-                    <div class="space-y-2 text-right">
-                      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Deadline</p>
-                      <p id="review-deadline" class="text-lg font-bold text-gray-800 dark:text-gray-200 leading-tight">-</p>
+                    <div class="text-right">
+                      <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Deadline</p>
+                      <p id="review-deadline" class="text-sm font-bold text-gray-900 dark:text-white">-</p>
                     </div>
                   </div>
                 </div>
 
-                <div class="p-6 bg-blue-600 rounded-3xl text-white shadow-xl shadow-blue-500/20">
-                  <div class="flex items-start space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                      <i class="fas fa-user-shield text-xl"></i>
-                    </div>
-                    <div>
-                      <h4 class="text-lg font-bold">Admin Review Process</h4>
-                      <p class="text-blue-100 text-sm font-medium mt-1 leading-relaxed">
-                        An administrator will review your instructions and materials within minutes. We will communicate the final price and confirm your expert via the website dashboard.
-                      </p>
-                    </div>
+                <div class="p-6 bg-blue-600 rounded-3xl text-white shadow-xl shadow-blue-500/20 flex items-start space-x-4">
+                  <i class="fas fa-info-circle text-2xl mt-1"></i>
+                  <div>
+                    <p class="font-bold">Expert Review Process</p>
+                    <p class="text-xs text-blue-100 mt-1 leading-relaxed">Our experts will review your request and confirm the final price. You will receive a notification once the review is complete.</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Price Breakdown Card -->
-              <div class="lg:col-span-2">
-                <div class="p-8 bg-gray-900 dark:bg-black rounded-3xl text-white sticky top-0 shadow-2xl overflow-hidden relative">
-                  <!-- Decorative circle -->
-                  <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl"></div>
-                  
-                  <h4 class="text-lg font-black tracking-tight mb-8 flex items-center relative z-10">
-                    <i class="fas fa-file-invoice-dollar mr-3 text-emerald-500"></i>
-                    Pricing Review
-                  </h4>
-                  
-                  <div class="space-y-6 mb-10 relative z-10">
-                    <div class="flex justify-between items-center text-gray-400 font-bold">
-                      <span id="review-price-label">Proposed Budget</span>
-                      <span id="review-proposed-budget" class="text-white text-xl">$0.00</span>
+              <div class="space-y-6">
+                <div class="p-8 bg-gray-900 dark:bg-black rounded-3xl text-white shadow-2xl relative overflow-hidden h-full">
+                  <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full -mr-16 -mt-16"></div>
+                  <h4 class="text-sm font-black uppercase tracking-widest text-gray-400 mb-8">Summary</h4>
+                  <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                      <span id="review-price-label" class="text-gray-400 font-bold">Proposed Budget</span>
+                      <span id="review-proposed-budget" class="text-xl font-black text-emerald-400">$0.00</span>
                     </div>
-
-                    <div id="couponDiscountRow" class="space-y-2 hidden">
-                      <div class="flex justify-between items-center text-green-400 font-bold">
-                        <span class="text-xs uppercase tracking-wider">Total Discounts</span>
-                        <span id="review-coupon-discount">-$0.00</span>
-                      </div>
-                      <div id="appliedCouponsList" class="flex flex-wrap gap-2 py-2 border-t border-gray-800">
-                        <!-- Applied coupons will appear here -->
-                      </div>
+                    <div id="couponDiscountRow" class="flex justify-between items-center text-green-400 font-bold hidden">
+                      <span class="text-xs uppercase tracking-widest">Discount</span>
+                      <span id="review-coupon-discount">-$0.00</span>
                     </div>
-                    
-                    <div class="h-px bg-gray-800 my-4"></div>
-
-                    <div class="mt-4">
+                    <div class="h-px bg-slate-800 w-full"></div>
+                    <div class="pt-2">
                       <div class="flex space-x-2">
-                        <input type="text" id="couponCode" placeholder="Promo Code" 
-                               class="flex-1 bg-gray-800 border-none rounded-xl p-3 text-sm focus:ring-1 focus:ring-emerald-500 text-white placeholder-gray-500 uppercase font-bold">
-                        <div class="flex flex-col space-y-1">
-                          <button type="button" onclick="applyCoupon()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all">
-                            Redeem
-                          </button>
-                        </div>
+                        <input type="text" id="couponCode" placeholder="COUPON" class="w-full bg-slate-800 border-none rounded-xl p-3 text-xs font-bold text-white uppercase focus:ring-1 focus:ring-blue-500">
+                        <button type="button" onclick="applyCoupon()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-[10px] font-black uppercase transition-all">Apply</button>
                       </div>
-                      <p id="couponMessage" class="hidden mt-2 text-[11px] font-bold"></p>
-                    </div>
-                    
-                    <div class="space-y-4">
-                      <div class="flex items-center space-x-3 text-amber-400">
-                        <i class="fas fa-hourglass-half text-sm"></i>
-                        <span class="text-xs font-bold uppercase tracking-wider">Awaiting Admin Confirmation</span>
-                      </div>
-                      <p class="text-[11px] text-gray-400 leading-relaxed font-medium">
-                        The price shown is your proposed budget. The final cost may be adjusted based on the complexity of your requirements.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="mt-8 flex flex-col space-y-3 relative z-10">
-                    <div class="flex items-center space-x-3 text-emerald-400 text-xs font-bold bg-emerald-400/10 p-4 rounded-2xl border border-emerald-400/20">
-                      <i class="fas fa-comment-dots text-lg"></i>
-                      <span>Real-time communication via dashboard</span>
+                      <p id="couponMessage" class="hidden text-[10px] mt-2 font-bold"></p>
                     </div>
                   </div>
                 </div>
@@ -1932,20 +2039,23 @@
         </form>
       </div>
 
-      <!-- Modal Footer -->
-      <div class="px-8 py-6 border-t dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
-        <button id="prevBtn" onclick="prevStep()" class="hidden px-8 py-4 text-gray-500 dark:text-gray-400 font-black hover:text-gray-900 dark:hover:text-white transition-all flex items-center group">
-          <i class="fas fa-chevron-left mr-3 group-hover:-translate-x-1 transition-transform"></i>
+      <!-- Full Page Footer -->
+      <div class="px-8 py-6 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between sticky bottom-0 z-20">
+        <button id="prevBtn" onclick="prevStep()" class="hidden px-6 py-4 text-gray-500 dark:text-gray-400 font-black hover:text-gray-900 dark:hover:text-white flex items-center group transition-all">
+          <i class="fas fa-arrow-left mr-3 group-hover:-translate-x-1 transition-transform"></i>
           Back
         </button>
-        <button id="nextBtn" onclick="nextStep()" class="ml-auto px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 transition-all hover:-translate-y-1 active:scale-95 flex items-center group">
-          Next Step
-          <i class="fas fa-chevron-right ml-3 group-hover:translate-x-1 transition-transform"></i>
-        </button>
-        <button id="submitOrderBtn" type="submit" form="orderForm" class="hidden ml-auto px-12 py-5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black rounded-2xl shadow-2xl shadow-blue-500/40 transition-all hover:-translate-y-1 active:scale-95 flex items-center group">
-          <span class="btn-text">Place My Order</span>
-          <i class="fas fa-paper-plane ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-        </button>
+        
+        <div class="flex items-center space-x-4 ml-auto">
+          <button id="nextBtn" onclick="nextStep()" class="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/30 flex items-center group transition-all">
+            Next Step
+            <i class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform"></i>
+          </button>
+          <button id="submitOrderBtn" type="submit" form="orderForm" class="hidden px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/40 flex items-center group transition-all">
+            Place Order
+            <i class="fas fa-paper-plane ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2269,6 +2379,9 @@ window.addEventListener('DOMContentLoaded', function() {
     loadDashBg();
     loadDashFont();
     
+    // Start real-time notifications
+    if (typeof startNotificationSSE === 'function') startNotificationSSE();
+    
     // Update header with user name
     const userName = localStorage.getItem("userName");
     if (userName) {
@@ -2277,7 +2390,8 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 const studentId = localStorage.getItem("userId"); // Ensure user ID is stored
-const API_BASE = "https://essayme2.onrender.com"; // Update with your actual API base URL
+var API_BASE = "https://essayme2.onrender.com"; // Local development
+window.API_BASE = API_BASE;
 
 // Helper for authenticated fetches
 async function fetchWithAuth(url, options = {}) {
@@ -2319,6 +2433,29 @@ function getImageUrl(path) {
     return `${API_BASE}/uploads/${path}`;
 }
 
+// --- Audio Notification Helpers ---
+function isAudioEnabled() {
+    return document.getElementById('pushNotifications')?.checked;
+}
+
+function playSubmissionSound() {
+    if (!isAudioEnabled()) return;
+    const audio = new Audio('../audio/notification-ping-335500.mp3');
+    audio.play().catch(e => console.error("Audio play failed:", e));
+}
+function playChatSendSound() {
+    if (!isAudioEnabled()) return;
+    const audio = new Audio('../audio/send.mp3');
+    audio.play().catch(e => console.error("Audio play failed:", e));
+}
+function playChatReceiveSound() {
+    if (!isAudioEnabled()) return;
+    const audio = new Audio('../audio/receive.mp3');
+    audio.play().catch(e => console.error("Audio play failed:", e));
+}
+
+// --- End Audio Notification Helpers ---
+
 function showConfirm(title, message, options = {}) {
     const { 
         confirmText = 'Confirm', 
@@ -2336,9 +2473,9 @@ function showConfirm(title, message, options = {}) {
         modal.className = 'fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in';
         
         const colors = {
-            warning: 'text-yellow-500 bg-yellow-50',
-            danger: 'text-red-500 bg-red-50',
-            info: 'text-blue-500 bg-blue-50'
+            warning: 'text-yellow-500 bg-yellow-50 dark:bg-yellow-500/10',
+            danger: 'text-red-500 bg-red-50 dark:bg-red-500/10',
+            info: 'text-blue-500 bg-blue-50 dark:bg-blue-500/10'
         };
 
         const icons = {
@@ -3019,9 +3156,9 @@ async function saveProfile() {
 function createMessageHTML(message) {
   return `
     <div class="chat-message ${message.sender === "Student" ? "student" : "tutor"}">
-      <div class="chat-bubble ${message.sender === "Student" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"} p-3 rounded-lg shadow-md">
+      <div class="chat-bubble ${message.sender === "Student" ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white"} p-3 rounded-lg shadow-md transition-colors duration-200">
         <strong>${message.sender}</strong>: ${message.content}
-        <br><small class="text-xs text-black-500">${message.timestamp}</small>
+        <br><small class="text-xs text-gray-500 dark:text-gray-400 font-bold">${message.timestamp}</small>
       </div>
     </div>`;
 }
@@ -3089,7 +3226,33 @@ document.getElementById("chat-box").addEventListener("input", toggleSendButton);
 
   // SSE realtime for student
   let studentEventSource = null;
+  let notificationEventSource = null;
   let studentSeenMessageIds = new Set();
+
+  function startNotificationSSE() {
+    if (notificationEventSource) { try { notificationEventSource.close(); } catch(_){} notificationEventSource = null; }
+    const url = `${API_BASE}/notifications/stream?userId=${encodeURIComponent(loggedInStudentId)}&role=user`;
+    notificationEventSource = new EventSource(url);
+    
+    notificationEventSource.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data);
+        if (data.type === 'new_message') {
+          const m = data.message;
+          // Only play receive sound if student is NOT currently in that specific chat
+          // The student-specific SSE will handle sounds if they ARE in the chat
+          const inSpecificChat = activeAssignment && String(activeAssignment.id) === String(data.assignmentId);
+          
+          if (!inSpecificChat && m.sender === 'tutor') {
+            console.log('Real-time: New message from tutor');
+            playChatReceiveSound();
+            // Instead of full poll, increment local count directly
+            incrementStudentUnread(data.assignmentId);
+          }
+        }
+      } catch(e) { console.error('SSE Error:', e); }
+    };
+  }
   function updateStudentSidebarBadge(){
     const total = Array.from(window.studentUnread?.values()||[]).reduce((a,b)=>a+b,0);
     const chatBadge = document.getElementById('student-chat-badge');
@@ -3207,9 +3370,20 @@ document.getElementById("chat-box").addEventListener("input", toggleSendButton);
           if (m._id) studentSeenMessageIds.add(m._id);
           const sender = m.sender === 'student' ? 'Student' : 'Tutor';
           appendMessageToChat({ sender, content: m.content, timestamp: new Date(m.createdAt).toLocaleString() });
+          
+          // Reset timer and play sound on receiving
+          resetInactivityTimer();
+          
           if(sender === 'Tutor'){
-            incrementStudentUnread(m.assignmentId);
-            document.getElementById('student-new-message-audio')?.play().catch(()=>{});
+            const chatViewVisible = !document.getElementById('chat-view').classList.contains('hidden');
+            if (chatViewVisible) {
+              // mark as read immediately
+              setStudentLastRead(m.assignmentId, new Date(m.createdAt).getTime() || Date.now());
+              clearStudentUnread(m.assignmentId);
+            } else {
+              incrementStudentUnread(m.assignmentId);
+            }
+            playChatReceiveSound();
           }
         }
       } catch(_){ }
@@ -3430,8 +3604,8 @@ document.getElementById("chat-box").addEventListener("input", toggleSendButton);
       const res = await fetchWithAuth(`${API_BASE}/messages`, { method:'POST', body: JSON.stringify({ assignmentId: activeAssignment.id, studentId: loggedInStudentId, tutorId, sender: 'student', content }) });
       const data = await res.json();
       if(!data.success){ console.error('Failed to send'); }
-      // play send sound on successful post
-      document.getElementById('student-send-audio')?.play().catch(()=>{});
+      // Play sound and reset timer
+      playChatSendSound();
     }catch(e){ console.error('Network error'); }
     finally {
       document.getElementById('chat-box').value='';
@@ -3579,6 +3753,45 @@ function toggleDropdown() {
     dropdown.classList.toggle('hidden');
 }
 
+// Fetch news and writing tips
+async function fetchDashboardContent() {
+    try {
+        const [announcementsRes, tipsRes] = await Promise.all([
+            fetch(`${API_BASE}/announcements`),
+            fetch(`${API_BASE}/tips`)
+        ]);
+        
+        const announcementsData = await announcementsRes.json();
+        const tipsData = await tipsRes.json();
+        
+        // Update writing tips
+        const tipsContainer = document.getElementById('writing-tips-container');
+        if (tipsContainer && tipsData.success && tipsData.tips) {
+            // Take only 3 random tips to keep it clean, or all if less than 3
+            const shuffled = tipsData.tips.sort(() => 0.5 - Math.random());
+            const selectedTips = shuffled.slice(0, 3);
+
+            tipsContainer.innerHTML = selectedTips.map((tip, index) => `
+                <div class="group/tip flex items-start space-x-4 p-4 bg-white/5 backdrop-blur-md rounded-2xl hover:bg-white/10 transition-all duration-300 border border-white/5 hover:border-white/10 transform hover:-translate-y-1 shadow-lg"
+                     style="animation: slide-up ${0.3 + (index * 0.1)}s cubic-bezier(0.16, 1, 0.3, 1) forwards">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400/20 to-orange-500/20 flex items-center justify-center flex-shrink-0 group-hover/tip:rotate-12 transition-transform shadow-inner">
+                        <i class="fas fa-lightbulb text-yellow-300 text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold leading-relaxed text-white/90">${tip.content}</p>
+                        <div class="mt-2 flex items-center space-x-2">
+                           <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                           <span class="text-[8px] font-black uppercase tracking-widest text-white/40">Tip #${index + 1}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error fetching dashboard content:', error);
+    }
+}
+
 // Update dashboard overview with real data
 async function updateDashboardOverview() {
     // Load additional content (news & tips)
@@ -3651,45 +3864,99 @@ async function loadUserPayments() {
     }
 }
 
-// Fetch Additional Dashboard Content (News & Tips)
-async function fetchDashboardContent() {
-  try {
-    // Fetch Announcements
-    const annResponse = await fetch(`${API_BASE}/announcements`);
-    const annData = await annResponse.json();
-    if (annData.success && annData.announcements.length > 0) {
-      const container = document.getElementById('academic-news-container');
-      if (container) {
-        container.innerHTML = annData.announcements.map(ann => `
-          <div class="flex items-start space-x-4">
-            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex-shrink-0 flex items-center justify-center text-indigo-600">
-              <i class="fas ${ann.icon || 'fa-graduation-cap'}"></i>
-            </div>
-            <div>
-              <h4 class="font-bold text-gray-800">${ann.title}</h4>
-              <p class="text-sm text-gray-500 mt-1">${ann.content}</p>
-            </div>
-          </div>
-        `).join('');
-      }
-    }
+// Load recent activity (compose from assignments + payments + recent messages)
+async function loadRecentActivity() {
+    const activityContainer = document.getElementById('recent-activity-container');
+    if (!activityContainer) return;
+    
+    try {
+        const [assignmentsRes, paymentsRes, recentMessagesRes] = await Promise.all([
+            fetchWithAuth(`${API_BASE}/orders/${studentId}`),
+            fetchWithAuth(`${API_BASE}/payments/${studentId}`),
+            fetchWithAuth(`${API_BASE}/tutor/recent-messages`)
+        ]);
+        
+        const assignmentsData = await assignmentsRes.json();
+        const paymentsData = await paymentsRes.json();
+        const recentMessagesData = await recentMessagesRes.json();
+        const activities = [];
 
-    // Fetch Tips
-    const tipsResponse = await fetch(`${API_BASE}/tips`);
-    const tipsData = await tipsResponse.json();
-    if (tipsData.success && tipsData.tips.length > 0) {
-      const container = document.getElementById('writing-tips-container');
-      if (container) {
-        container.innerHTML = tipsData.tips.map(tip => `
-          <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
-            <p class="text-sm italic">"${tip.content}"</p>
-          </div>
+        if (assignmentsData.success) {
+            (assignmentsData.orders || []).forEach(a => {
+                if (a.createdAt) activities.push({
+                    ts: new Date(a.createdAt).getTime(),
+                    icon: 'fas fa-plus-circle text-blue-500',
+                    title: 'New Order Placed',
+                    text: `You placed an order for: ${a.assignmentTitle}`,
+                    time: new Date(a.createdAt).toLocaleDateString()
+                });
+                if (a.status === 'completed') {
+                    activities.push({
+                        ts: new Date(a.updatedAt || a.createdAt).getTime(),
+                        icon: 'fas fa-check-circle text-emerald-500',
+                        title: 'Order Completed',
+                        text: `Your assignment "${a.assignmentTitle}" is ready for download!`,
+                        time: new Date(a.updatedAt || a.createdAt).toLocaleDateString()
+                    });
+                }
+            });
+        }
+
+        if (paymentsData.success) {
+            (paymentsData.payments || []).forEach(p => {
+                activities.push({
+                    ts: new Date(p.createdAt).getTime(),
+                    icon: 'fas fa-wallet text-emerald-500',
+                    title: 'Wallet Deposit',
+                    text: `Deposit of $${Number(p.amount).toFixed(2)} via ${p.payment_method} is ${p.status}`,
+                    time: new Date(p.createdAt).toLocaleDateString()
+                });
+            });
+        }
+
+        if (recentMessagesData.success) {
+            // Filter messages for this student only
+            (recentMessagesData.messages || []).forEach(m => {
+                // We don't have a direct studentId in recent-messages but we can match by studentName or assignment
+                // For student dashboard, it's better to show only tutor messages to them
+                if (m.sender === 'tutor') {
+                    activities.push({
+                        ts: new Date(m.createdAt).getTime(),
+                        icon: 'fas fa-comment-dots text-indigo-500',
+                        title: 'New Message from Tutor',
+                        text: `Regarding "${m.assignmentTitle}": ${m.content.substring(0, 50)}${m.content.length > 50 ? '...' : ''}`,
+                        time: new Date(m.createdAt).toLocaleDateString()
+                    });
+                }
+            });
+        }
+
+        activities.sort((a, b) => b.ts - a.ts);
+        const top = activities.slice(0, 15);
+        
+        if (top.length === 0) {
+            activityContainer.innerHTML = '<div class="text-sm text-gray-500 text-center py-8">No recent activity</div>';
+            return;
+        }
+
+        activityContainer.innerHTML = top.map(act => `
+            <div class="flex items-start space-x-4 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
+                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center">
+                    <i class="${act.icon}"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">${act.title}</h4>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${act.time}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed">${act.text}</p>
+                </div>
+            </div>
         `).join('');
-      }
+    } catch (error) {
+        console.error('Error loading recent activity:', error);
+        activityContainer.innerHTML = '<div class="text-sm text-red-500 text-center py-8">Failed to load activity</div>';
     }
-  } catch (error) {
-    console.error('Error fetching dashboard content:', error);
-  }
 }
 
 // Display payment history
@@ -3795,6 +4062,7 @@ document.addEventListener('DOMContentLoaded', function() {
   fetchProfile(); // Load user profile
   fetchHomework(); // Load assignments
   updateDashboardOverview(); // Update dashboard cards
+  loadRecentActivity(); // Load recent activity
   // Messages are loaded via SSE when assignment is selected
   loadUserPayments(); // Load payment history
   checkBalanceNotification(); // Check if balance notification should be shown
@@ -4228,6 +4496,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             
             if (response.ok) {
+                playSubmissionSound();
                 showSuccessMessage(result.order);
                 closeOrderModal();
                 fetchHomework();
@@ -4366,7 +4635,7 @@ function showSuccessMessage(order) {
                 <i class="fas fa-check text-4xl text-green-500"></i>
             </div>
             
-            <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Order Confirmed! 🎉</h3>
+            <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2">Order Confirmed!</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-8">Your assignment is now being reviewed by our experts.</p>
             
             <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-6 mb-8 text-left border dark:border-gray-700 space-y-3">
@@ -4442,6 +4711,7 @@ function closeSuccessMessage() {
 
 // Payment System Functions
 let selectedPaymentAmount = 0;
+let paystackPublicKey = '';
 
 // Set amount for payment
 function setAmount(amount) {
@@ -4450,6 +4720,24 @@ function setAmount(amount) {
 }
 
 // Select payment method
+function showPaymentOptions() {
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    if (!amount || amount < 10) {
+        showMessage('Please enter an amount of at least $10', 'warning');
+        return;
+    }
+    
+    selectedPaymentAmount = amount;
+    const section = document.getElementById('paymentMethodsSection');
+    section.classList.remove('hidden');
+    // Force reflow for animation
+    section.offsetHeight;
+    section.classList.remove('translate-y-8', 'opacity-0');
+    section.classList.add('translate-y-0', 'opacity-100');
+    
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function selectPaymentMethod(method) {
     const amount = parseFloat(document.getElementById('depositAmount').value);
     
@@ -4469,10 +4757,11 @@ function selectPaymentMethod(method) {
         if (el) el.textContent = `$${amount.toFixed(2)}`;
     });
     
-    // Show appropriate modal
+    // Show appropriate modal or process directly
     switch(method) {
         case 'paystack':
-            document.getElementById('paystackModal').classList.remove('hidden');
+            // Open Paystack directly
+            processPaystackPayment();
             break;
         case 'paypal':
             document.getElementById('paypalModal').classList.remove('hidden');
@@ -4496,17 +4785,23 @@ function closePaymentModal() {
 
 // Process Paystack payment
 function processPaystackPayment() {
+    if (!paystackPublicKey) {
+        showMessage('Payment system initializing, please try again in a moment', 'info');
+        loadPaystackScript();
+        return;
+    }
     // Initialize Paystack payment
     const handler = PaystackPop.setup({
-        key: 'pk_live_7ab8e015626516d7d00210b2e7fe169805c226b8',
+        key: paystackPublicKey,
         email: (localStorage.getItem('userEmail') || document.getElementById('user-email')?.textContent?.trim() || ''),
         amount: selectedPaymentAmount * 100, // Amount in kobo
         currency: 'USD',
         callback: function(response) {
             // Payment successful
-            updateUserBalance(selectedPaymentAmount, 'paystack', response.reference);
-            closePaymentModal();
-            showPaymentSuccess('Paystack', selectedPaymentAmount, response.reference);
+            updateUserBalance(selectedPaymentAmount, 'paystack', response.reference, () => {
+                closePaymentModal();
+                showPaymentSuccess('Paystack', selectedPaymentAmount, response.reference);
+            });
         },
         onClose: function() {
             showMessage('Payment cancelled', 'info');
@@ -4672,7 +4967,20 @@ async function requestWithdraw(amount, method, destination) {
 }
 
 // Update user balance
-async function updateUserBalance(amount, method = 'paystack', reference = '') {
+async function updateUserBalance(amount, method = 'paystack', reference = '', onComplete = null) {
+    // Show modal in loading state
+    const modal = document.getElementById('payment-modal');
+    const loadingState = document.getElementById('payment-loading-state');
+    const successState = document.getElementById('payment-success-state');
+    const pendingState = document.getElementById('payment-pending-state');
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+        loadingState.classList.remove('hidden');
+        successState.classList.add('hidden');
+        pendingState.classList.add('hidden');
+    }
+
     try {
         const response = await fetchWithAuth(`${API_BASE}/update-balance`, {
             method: 'POST',
@@ -4687,94 +4995,61 @@ async function updateUserBalance(amount, method = 'paystack', reference = '') {
         const result = await response.json();
         
         if (result.success) {
-            // Update balance display
-            document.getElementById('userBalance').textContent = `$${result.newBalance.toFixed(2)}`;
-            // Hide balance notification if it was showing
-            document.getElementById('balanceNotification').classList.add('hidden');
-            // Refresh assignments to update status
-            fetchHomework();
-            updateDashboardOverview();
+            // Transition to success state
+            setTimeout(() => {
+                loadingState.classList.add('hidden');
+                successState.classList.remove('hidden');
+                
+                document.getElementById('success-amount').textContent = `$${amount.toFixed(2)}`;
+                document.getElementById('success-method').textContent = method.charAt(0).toUpperCase() + method.slice(1);
+                document.getElementById('success-ref').textContent = reference || 'N/A';
+                
+                if (onComplete) onComplete();
+            }, 1500);
+        } else {
+            if (modal) modal.classList.add('hidden');
+            showMessage(result.error || 'Failed to update balance', 'error');
         }
     } catch (error) {
         console.error('Error updating balance:', error);
+        if (modal) modal.classList.add('hidden');
+        showMessage('Error updating balance', 'error');
     }
 }
 
 
 // Show payment success message
 function showPaymentSuccess(method, amount, reference) {
-    const successModal = document.createElement('div');
-    successModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    successModal.innerHTML = `
-        <div class="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-            <div class="mb-4">
-                <i class="fas fa-check-circle text-green-500 text-6xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful! 🎉</h3>
-            <p class="text-gray-600 mb-4">Your account has been credited.</p>
-            
-            <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left">
-                <h4 class="font-semibold text-gray-800 mb-2">Payment Details:</h4>
-                <p class="text-sm text-gray-600"><strong>Method:</strong> ${method}</p>
-                <p class="text-sm text-gray-600"><strong>Amount:</strong> $${amount.toFixed(2)}</p>
-                <p class="text-sm text-gray-600"><strong>Reference:</strong> ${reference}</p>
-            </div>
-            
-            <button onclick="closePaymentSuccess()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
-                <i class="fas fa-thumbs-up mr-2"></i>Great!
-            </button>
-        </div>
-    `;
+    // This is now handled inside updateUserBalance for smoother transition
+    // But we keep the function for compatibility if needed elsewhere
+    const modal = document.getElementById('payment-modal');
+    const loadingState = document.getElementById('payment-loading-state');
+    const successState = document.getElementById('payment-success-state');
     
-    document.body.appendChild(successModal);
-    
-    // Auto-close after 5 seconds
-    setTimeout(() => {
-        if (document.body.contains(successModal)) {
-            closePaymentSuccess();
-        }
-    }, 5000);
+    if (modal) {
+        modal.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+        successState.classList.remove('hidden');
+        
+        document.getElementById('success-amount').textContent = `$${amount.toFixed(2)}`;
+        document.getElementById('success-method').textContent = method.charAt(0).toUpperCase() + method.slice(1);
+        document.getElementById('success-ref').textContent = reference || 'N/A';
+    }
 }
 
 // Show payment pending message
 function showPaymentPending(method, amount) {
-    const pendingModal = document.createElement('div');
-    pendingModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    pendingModal.innerHTML = `
-        <div class="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
-            <div class="mb-4">
-                <i class="fas fa-clock text-yellow-500 text-6xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Submitted! ⏳</h3>
-            <p class="text-gray-600 mb-4">Your payment proof has been submitted for review.</p>
-            
-            <div class="bg-yellow-50 rounded-lg p-4 mb-4 text-left">
-                <h4 class="font-semibold text-gray-800 mb-2">Submission Details:</h4>
-                <p class="text-sm text-gray-600"><strong>Method:</strong> ${method}</p>
-                <p class="text-sm text-gray-600"><strong>Amount:</strong> $${amount.toFixed(2)}</p>
-                <p class="text-sm text-gray-600"><strong>Status:</strong> Pending Approval</p>
-            </div>
-            
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                <p class="text-blue-800 text-sm">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Your account will be credited once the payment is approved by our team.
-                </p>
-            </div>
-            
-            <button onclick="closePaymentSuccess()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-                <i class="fas fa-check mr-2"></i>Got It!
-            </button>
-        </div>
-    `;
+    const modal = document.getElementById('payment-modal');
+    const loadingState = document.getElementById('payment-loading-state');
+    const pendingState = document.getElementById('payment-pending-state');
+    const successState = document.getElementById('payment-success-state');
     
-    document.body.appendChild(pendingModal);
-}
-
-// Close payment success/pending modal
-function closePaymentSuccess() {
-    const modals = document.querySelectorAll('.fixed.inset-0.bg-black.bg-opacity-50');
-    modals.forEach(m => m.remove());
+    if (modal) {
+        modal.classList.remove('hidden');
+        loadingState.classList.add('hidden');
+        successState.classList.add('hidden');
+        pendingState.classList.remove('hidden');
+    }
 }
 
 // Check if user needs to top up balance (server-driven)
@@ -4801,7 +5076,15 @@ async function checkBalanceNotification() {
 }
 
 // Load Paystack script
-function loadPaystackScript() {
+async function loadPaystackScript() {
+    try {
+        const res = await fetch(`${API_BASE}/api/config`);
+        const config = await res.json();
+        paystackPublicKey = config.paystackPublicKey;
+    } catch (e) {
+        console.error('Failed to load Paystack config:', e);
+    }
+
     if (!document.getElementById('paystack-script')) {
         const script = document.createElement('script');
         script.id = 'paystack-script';
@@ -5045,41 +5328,41 @@ document.addEventListener('DOMContentLoaded', function() {
             <i class="fas fa-palette text-white"></i>
           </div>
           <div>
-            <h2 class="text-2xl font-bold text-gray-800">Chat Themes</h2>
-            <p class="text-gray-600">Customize your chat experience</p>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Chat Themes</h2>
+            <p class="text-gray-600 dark:text-gray-400">Customize your chat experience</p>
           </div>
         </div>
-        <button onclick="closeChatSettings()" class="text-gray-500 hover:text-gray-700 text-2xl">
+        <button onclick="closeChatSettings()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white text-2xl">
           <i class="fas fa-times"></i>
         </button>
       </div>
 
       <!-- Theme Selection -->
       <div class="mb-8">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Choose Your Theme</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Choose Your Theme</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           <!-- Default Theme -->
-          <div class="theme-preview bg-white border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-all" data-theme="default" onclick="showThemePreview('default')">
+          <div class="theme-preview bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-all" data-theme="default" onclick="showThemePreview('default')">
             <div class="mb-3">
-              <h4 class="font-semibold text-gray-800">Classic Blue</h4>
-              <p class="text-sm text-gray-600">Clean and professional</p>
+              <h4 class="font-semibold text-gray-800 dark:text-white">Classic Blue</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Clean and professional</p>
             </div>
             <div class="space-y-2">
               <div class="bg-blue-500 text-white p-2 rounded-lg text-sm ml-auto max-w-[80%]">
                 Your message
               </div>
-              <div class="bg-gray-100 text-gray-800 p-2 rounded-lg text-sm mr-auto max-w-[80%]">
+              <div class="bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-white p-2 rounded-lg text-sm mr-auto max-w-[80%]">
                 Tutor response
               </div>
             </div>
           </div>
 
           <!-- Ocean Theme -->
-          <div class="theme-preview bg-white border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-all" data-theme="ocean" onclick="showThemePreview('ocean')">
+          <div class="theme-preview bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition-all" data-theme="ocean" onclick="showThemePreview('ocean')">
             <div class="mb-3">
-              <h4 class="font-semibold text-gray-800">Ocean Waves</h4>
-              <p class="text-sm text-gray-600">Deep blue gradients</p>
+              <h4 class="font-semibold text-gray-800 dark:text-white">Ocean Waves</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Deep blue gradients</p>
             </div>
             <div class="space-y-2">
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" class="text-white p-2 rounded-lg text-sm ml-auto max-w-[80%]">
@@ -5216,7 +5499,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto mb-4" id="liveThemePreview">
         <div class="space-y-3">
           <div class="preview-student-message">
-            Hey! I need help with this assignment 📚
+            Hey! I need help with this assignment 
           </div>
           <div class="preview-tutor-message">
             Of course! I'd be happy to help you. What specific part are you struggling with?
@@ -5429,14 +5712,14 @@ async function saveChatTheme() {
     if (response.ok) {
       const result = await response.json();
       if (result.success) {
-        showNotification('Theme saved successfully! 🎨', 'success');
+        showNotification('Theme saved successfully!', 'success');
         return;
       }
     }
     
     // Fallback to localStorage if server fails
     localStorage.setItem('chatTheme', JSON.stringify(themeData));
-    showNotification('Theme saved locally! 💾', 'success');
+    showNotification('Theme saved locally!', 'success');
     
   } catch (error) {
     console.error('Error saving theme:', error);
@@ -5452,7 +5735,7 @@ async function saveChatTheme() {
     };
     
     localStorage.setItem('chatTheme', JSON.stringify(themeData));
-    showNotification('Theme saved locally! 💾', 'success');
+    showNotification('Theme saved locally!', 'success');
   }
 }
 

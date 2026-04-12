@@ -11,167 +11,175 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { font-family: 'Inter', sans-serif; }
-    body { background: #f8fff8; }
-    .mesh-bg {
-      background: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.15), transparent 55%), radial-gradient(circle at 80% 10%, rgba(20, 184, 166, 0.15), transparent 45%), linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 100%);
-    }
-    .header-shell {
-      background: rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid rgba(34, 197, 94, 0.1);
-      backdrop-filter: blur(16px);
-    }
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 1rem;
-      background: linear-gradient(140deg, #22c55e, #4ade80);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: white;
-    }
-    .primary-btn {
-      background: linear-gradient(135deg, #22c55e, #065f46);
-      color: white;
-      border-radius: 1rem;
-      font-weight: 600;
-      padding: 0.95rem 1.2rem;
-      transition: all 0.2s ease;
-    }
+    body { background: #f8fff8; color: #1e293b; }
+    .mesh-bg { position: relative; overflow: hidden; background: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.15), transparent 55%), radial-gradient(circle at 80% 10%, rgba(20, 184, 166, 0.15), transparent 45%), linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 100%); }
+    .mesh-bg::before, .mesh-bg::after { content: ''; position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.35; pointer-events: none; }
+    .mesh-bg::before { width: 450px; height: 450px; background: #bbf7d0; top: -180px; left: -120px; }
+    .mesh-bg::after { width: 400px; height: 400px; background: #99f6e4; bottom: -160px; right: -120px; }
+    .header-shell { background: rgba(255, 255, 255, 0.85); border-bottom: 1px solid rgba(34, 197, 94, 0.1); backdrop-filter: blur(16px); }
+    .brand-lockup { display: inline-flex; align-items: center; gap: 0.75rem; }
+    .brand-icon { width: 42px; height: 42px; border-radius: 1rem; background: linear-gradient(140deg, #22c55e, #4ade80); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; color: white; box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3); }
+    .brand-title { display: block; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; color: #0f172a; }
+    .brand-sub { display: block; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: #166534; }
+    .nav-cluster { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .nav-link { position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.85rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 500; color: #475569; transition: all 0.25s ease; }
+    .nav-link::after { content: ''; position: absolute; bottom: 6px; left: 0.85rem; right: 0.85rem; height: 2px; background: #22c55e; transform: scaleX(0); transition: transform 0.25s ease; border-radius: 99px; }
+    .nav-link:hover { color: #22c55e; background: rgba(34, 197, 94, 0.05); }
+    .nav-link:hover::after { transform: scaleX(1); }
+    .cta-ghost { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.8rem 1.1rem; border-radius: 0.95rem; border: 1px dashed #22c55e; background: #f0fdf4; font-weight: 600; color: #166534; transition: all 0.2s ease; }
+    .cta-ghost:hover { border-color: #4ade80; background: #dcfce7; }
+    .notice-dot { display: inline-block; width: 8px; height: 8px; border-radius: 9999px; background: #4ade80; box-shadow: 0 0 10px rgba(74, 222, 128, 0.5); flex-shrink: 0; }
+    .menu-icon { position: relative; width: 18px; height: 12px; }
+    .menu-icon::before, .menu-icon::after, .menu-icon span { content: ''; position: absolute; left: 0; width: 100%; height: 2px; border-radius: 9999px; background: #475569; }
+    .menu-icon span { top: 5px; }
+    .menu-icon::before { top: 0; }
+    .menu-icon::after { bottom: 0; }
+    .primary-btn { display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 0.95rem 1.2rem; border-radius: 1rem; font-weight: 600; background: linear-gradient(135deg, #22c55e, #065f46); color: white; transition: all 0.2s ease; }
     .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 15px 35px rgba(34, 197, 94, 0.25); }
-    .secondary-btn {
-      border: 1px solid #e2e8f0;
-      background: white;
-      color: #475569;
-      border-radius: 1rem;
-      font-weight: 600;
-      padding: 0.95rem 1.2rem;
-      transition: all 0.2s ease;
-    }
+    .secondary-btn { display: inline-flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 0.95rem 1.2rem; border-radius: 1rem; font-weight: 600; border: 1px solid #e2e8f0; background: white; color: #475569; transition: all 0.2s ease; }
     .secondary-btn:hover { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
-    .glass {
-      border-radius: 1.5rem;
-      background: rgba(255, 255, 255, 0.75);
-      border: 1px solid rgba(34, 197, 94, 0.1);
-      backdrop-filter: blur(24px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
+    .glass { position: relative; border-radius: 1.5rem; background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(34, 197, 94, 0.1); backdrop-filter: blur(24px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); }
+    .service-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem; border-radius: 9999px; background: rgba(34, 197, 94, 0.08); color: #22c55e; font-weight: 600; font-size: 0.85rem; }
+    .feature-bullet { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .feature-bullet::before { content: ''; width: 9px; height: 9px; border-radius: 9999px; margin-top: 0.4rem; box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); background: #22c55e; flex-shrink: 0; }
   </style>
 </head>
 <body>
   <header class="sticky top-0 z-30">
     <div class="header-shell">
       <div class="w-full px-4 sm:px-6 lg:px-10 py-4 flex items-center gap-6">
-        <a href="../index.html" class="brand-lockup flex items-center gap-3">
+        <a href="../index.html" class="brand-lockup">
           <div class="brand-icon">E</div>
           <div>
-            <span class="font-bold text-lg">EssayMe</span>
-            <span class="text-xs text-green-700 uppercase tracking-wider">Fresh human writing</span>
+            <span class="brand-title">EssayMe</span>
+            <span class="brand-sub">Fresh human writing</span>
           </div>
         </a>
-        <div class="ml-auto flex gap-3">
-          <a href="../index.html" class="secondary-btn w-auto px-5 py-2">Home</a>
-          <a href="../index.html#pricing" class="primary-btn w-auto px-5 py-2">Get Quote</a>
+        <nav class="hidden lg:flex flex-1 justify-center">
+          <div class="nav-cluster">
+            <a href="../index.html#pricing" class="nav-link"><i class="fas fa-seedling"></i>Pricing</a>
+            <a href="../index.html#services" class="nav-link"><i class="fas fa-feather-pointed"></i>Services</a>
+            <a href="assignment-help.html" class="nav-link"><i class="fas fa-scroll"></i>Assignments</a>
+            <a href="../company/reviews.html" class="nav-link"><i class="fas fa-star-half-stroke"></i>Reviews</a>
+          </div>
+        </nav>
+        <div class="hidden md:flex items-center gap-3 ml-auto">
+          <a href="../index.html#pricing" class="cta-ghost hidden xl:inline-flex"><span class="notice-dot"></span>Instant Quote</a>
+          <a href="../index.html" class="secondary-btn w-auto px-5 py-2">Login</a>
+          <a href="../index.html" class="primary-btn w-auto px-5 py-2">Sign Up</a>
         </div>
+        <a href="../index.html" class="md:hidden ml-auto w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600"><span class="menu-icon"><span></span></span></a>
       </div>
     </div>
   </header>
 
-  <section class="mesh-bg py-20">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-      <h1 class="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6">Essay Writing Service</h1>
-      <p class="text-xl text-slate-600 max-w-2xl mx-auto">
-        Professionally written essays by expert human writers. 100% original content, free plagiarism reports, and guaranteed on-time delivery.
-      </p>
-    </div>
-  </section>
-
-  <section class="py-16 bg-white">
-    <div class="max-w-4xl mx-auto px-6">
-      <div class="glass p-10 mb-12">
-        <h2 class="text-2xl font-bold mb-6">What you get with our essay writing service</h2>
-        <ul class="space-y-4">
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>100% human-written content with no AI involvement</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>Free plagiarism and AI authenticity reports with every order</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>All academic levels: High School, College, University, Masters</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>APA, MLA, Chicago, Harvard, and all citation styles</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>Unlimited free revisions within 7 days of delivery</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-green-500 flex-shrink-0 flex items-center justify-center text-white text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
-            <span>Turnaround times from 3 hours to 14 days</span>
-          </li>
-        </ul>
+  <main>
+    <section class="mesh-bg py-20">
+      <div class="max-w-4xl mx-auto px-6 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100/50 border border-green-200 text-green-800 text-sm font-bold tracking-wide uppercase mb-6">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          Spring Bloom Special
+        </div>
+        <h1 class="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6">Essay Writing Service</h1>
+        <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+          Professionally written essays by expert human writers. 100% original content, free plagiarism reports, and guaranteed on-time delivery.
+        </p>
       </div>
+    </section>
 
-      <div class="text-center">
-        <a href="../index.html#pricing" class="primary-btn text-lg px-8 py-4 inline-block">Get Your Essay Started</a>
+    <section class="py-16 bg-white">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="glass p-10 mb-12">
+          <h2 class="text-2xl font-bold mb-6">What you get with our essay writing service</h2>
+          <ul class="space-y-4">
+            <li class="feature-bullet">100% human-written content with no AI involvement</li>
+            <li class="feature-bullet">Free plagiarism and AI authenticity reports with every order</li>
+            <li class="feature-bullet">All academic levels: High School, College, University, Masters</li>
+            <li class="feature-bullet">APA, MLA, Chicago, Harvard, and all citation styles</li>
+            <li class="feature-bullet">Unlimited free revisions within 7 days of delivery</li>
+            <li class="feature-bullet">Turnaround times from 3 hours to 14 days</li>
+          </ul>
+        </div>
+
+        <div class="text-center">
+          <a href="../index.html#pricing" class="primary-btn text-lg px-8 py-4 inline-block">Get Your Essay Started</a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <footer class="bg-gradient-to-b from-white to-green-50 border-t border-green-100">
-    <div class="max-w-6xl mx-auto px-6 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div class="space-y-4">
-          <a href="../index.html" class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div class="space-y-6">
+          <a href="../index.html" class="brand-lockup">
             <div class="brand-icon">E</div>
             <div>
-              <span class="font-bold text-lg">EssayMe</span>
-              <span class="text-xs text-green-700 block">Fresh human writing</span>
+              <span class="brand-title">EssayMe</span>
+              <span class="brand-sub">Fresh human writing</span>
             </div>
           </a>
-          <p class="text-slate-500 text-sm">Premium academic writing service with human-only writers.</p>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Premium academic writing service with human-only writers. 100% original content, delivered on time, every time.
+          </p>
+          <div class="flex gap-4">
+            <a href="#" class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 hover:bg-green-200 transition-colors">
+              <i class="fab fa-discord"></i>
+            </a>
+          </div>
         </div>
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-900">Services</h4>
-          <ul class="space-y-2">
-            <li><a href="essay-writing.html" class="text-slate-500 hover:text-green-600 text-sm">Essay Writing</a></li>
-            <li><a href="research-papers.html" class="text-slate-500 hover:text-green-600 text-sm">Research Papers</a></li>
-            <li><a href="assignment-help.html" class="text-slate-500 hover:text-green-600 text-sm">Assignment Help</a></li>
-            <li><a href="test-support.html" class="text-slate-500 hover:text-green-600 text-sm">Test Support</a></li>
-            <li><a href="editing-proofreading.html" class="text-slate-500 hover:text-green-600 text-sm">Editing & Proofreading</a></li>
+
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-900 text-lg">Services</h4>
+          <ul class="space-y-3">
+            <li><a href="essay-writing.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Essay Writing</a></li>
+            <li><a href="research-papers.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Research Papers</a></li>
+            <li><a href="assignment-help.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Assignment Help</a></li>
+            <li><a href="test-support.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Test Support</a></li>
+            <li><a href="editing-proofreading.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Editing & Proofreading</a></li>
           </ul>
         </div>
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-900">Company</h4>
-          <ul class="space-y-2">
-            <li><a href="../company/about-us.html" class="text-slate-500 hover:text-green-600 text-sm">About Us</a></li>
-            <li><a href="../company/how-it-works.html" class="text-slate-500 hover:text-green-600 text-sm">How It Works</a></li>
-            <li><a href="../company/pricing.html" class="text-slate-500 hover:text-green-600 text-sm">Pricing</a></li>
-            <li><a href="../company/reviews.html" class="text-slate-500 hover:text-green-600 text-sm">Reviews</a></li>
-            <li><a href="../company/blog.html" class="text-slate-500 hover:text-green-600 text-sm">Blog</a></li>
+
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-900 text-lg">Company</h4>
+          <ul class="space-y-3">
+            <li><a href="../company/about-us.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">About Us</a></li>
+            <li><a href="../company/how-it-works.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">How It Works</a></li>
+            <li><a href="../company/pricing.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Pricing</a></li>
+            <li><a href="../company/reviews.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Reviews</a></li>
+            <li><a href="../company/blog.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Blog</a></li>
           </ul>
         </div>
-        <div class="space-y-3">
-          <h4 class="font-bold text-slate-900">Support</h4>
-          <ul class="space-y-2">
-            <li><a href="../support/help-center.html" class="text-slate-500 hover:text-green-600 text-sm">Help Center</a></li>
-            <li><a href="../support/privacy-policy.html" class="text-slate-500 hover:text-green-600 text-sm">Privacy Policy</a></li>
-            <li><a href="../support/terms-of-service.html" class="text-slate-500 hover:text-green-600 text-sm">Terms of Service</a></li>
-            <li><a href="../support/refund-policy.html" class="text-slate-500 hover:text-green-600 text-sm">Refund Policy</a></li>
-            <li><a href="../support/contact-us.html" class="text-slate-500 hover:text-green-600 text-sm">Contact Us</a></li>
+
+        <div class="space-y-4">
+          <h4 class="font-bold text-slate-900 text-lg">Support</h4>
+          <ul class="space-y-3">
+            <li><a href="../support/help-center.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Help Center</a></li>
+            <li><a href="../support/privacy-policy.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Privacy Policy</a></li>
+            <li><a href="../support/terms-of-service.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Terms of Service</a></li>
+            <li><a href="../support/refund-policy.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Refund Policy</a></li>
+            <li><a href="../support/contact-us.html" class="text-slate-500 hover:text-green-600 text-sm transition-colors">Contact Us</a></li>
           </ul>
         </div>
       </div>
-      <div class="mt-12 pt-8 border-t border-green-100 text-center">
+
+      <div class="mt-16 pt-8 border-t border-green-100 flex flex-col md:flex-row justify-between items-center gap-6">
         <p class="text-slate-400 text-sm">© 2026 EssayMe. All rights reserved.</p>
+        <div class="flex items-center gap-6">
+          <img src="https://cdn-icons-png.flaticon.com/16/349/349221.png" alt="Visa" class="h-4 opacity-60">
+          <img src="https://cdn-icons-png.flaticon.com/16/349/349225.png" alt="Mastercard" class="h-4 opacity-60">
+          <img src="https://cdn-icons-png.flaticon.com/16/349/349230.png" alt="PayPal" class="h-4 opacity-60">
+          <img src="https://cdn-icons-png.flaticon.com/16/5968/5968144.png" alt="Apple Pay" class="h-4 opacity-60">
+        </div>
       </div>
     </div>
   </footer>
